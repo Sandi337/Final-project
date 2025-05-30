@@ -14,7 +14,7 @@ Scene *New_GameScene(int label)
     GameScene *pDerivedObj = (GameScene *)malloc(sizeof(GameScene));
     Scene *pObj = New_Scene(label);
     // setting derived object member
-    pDerivedObj->background = al_load_bitmap("assets/image/stage.jpg");
+    pDerivedObj->background = al_load_bitmap("assets/image/main_scene.png");
     pObj->pDerivedObj = pDerivedObj;
     // register element
     _Register_elements(pObj, New_Floor(Floor_L));
@@ -35,6 +35,11 @@ void game_scene_update(Scene *self)
     {
         Elements *ele = allEle.arr[i];
         ele->Update(ele);
+        // 檢查投射物的 done 旗標
+        if (ele->label == Projectile_L && ((Projectile *)ele->pDerivedObj)->done)
+        {
+            ele->dele = true; // 標記為刪除
+        }
     }
     // run interact for every element
     for (int i = 0; i < allEle.len; i++)

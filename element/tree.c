@@ -30,7 +30,10 @@ void Tree_interact(Elements *self) {}
 void Tree_draw(Elements *self)
 {
     Tree *Obj = ((Tree *)(self->pDerivedObj));
-    al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    bool is_visible = false;
+    if(is_visible){
+        al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    }
 }
 void Tree_destory(Elements *self)
 {

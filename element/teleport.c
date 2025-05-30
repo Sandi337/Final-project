@@ -61,7 +61,10 @@ void _Teleport_interact_Character(Elements *self, Elements *tar)
 void Teleport_draw(Elements *self)
 {
     Teleport *Obj = ((Teleport *)(self->pDerivedObj));
-    al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    bool is_visible = false;
+    if(is_visible){
+        al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    }
 }
 void Teleport_destory(Elements *self)
 {

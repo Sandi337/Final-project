@@ -66,13 +66,16 @@ void _Floor_interact_Character(Elements *self, Elements *tar)
 void Floor_draw(Elements *self)
 {
     Floor *Obj = ((Floor *)(self->pDerivedObj));
-    for (int i = 0; i < 6; i++)
-    {
-        for (int j = 0; j < 6; j++)
+    bool is_visible = false;
+    if(is_visible){
+        for (int i = 0; i < 6; i++)
         {
-            if (Obj->map_data[i][j])
+            for (int j = 0; j < 6; j++)
             {
-                al_draw_bitmap(Obj->img, Obj->x + j * Obj->width, Obj->y + i * Obj->height, 0);
+                if (Obj->map_data[i][j])
+                {
+                    al_draw_bitmap(Obj->img, Obj->x + j * Obj->width, Obj->y + i * Obj->height, 0);
+                }
             }
         }
     }

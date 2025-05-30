@@ -22,11 +22,11 @@ Elements *New_Character(int label)
     for (int i = 0; i < 3; i++)
     {
         char buffer[50];
-        sprintf(buffer, "assets/image/chara_%s.gif", state_string[i]);
+        sprintf(buffer, "assets/image/ichigo_%s.gif", state_string[i]);
         pDerivedObj->gif_status[i] = algif_new_gif(buffer, -1);
     }
     // load effective sound
-    ALLEGRO_SAMPLE *sample = al_load_sample("assets/sound/atk_sound.wav");
+    ALLEGRO_SAMPLE *sample = al_load_sample("assets/sound/Shovelsound.mp3");
     pDerivedObj->atk_Sound = al_create_sample_instance(sample);
     al_set_sample_instance_playmode(pDerivedObj->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
     al_attach_sample_instance_to_mixer(pDerivedObj->atk_Sound, al_get_default_mixer());
@@ -113,14 +113,14 @@ void Character_update(Elements *self)
                 pro = New_Projectile(Projectile_L,
                                      chara->x + chara->width - 100,
                                      chara->y + 10,
-                                     5);
+                                     0);
             }
             else
             {
                 pro = New_Projectile(Projectile_L,
                                      chara->x - 50,
                                      chara->y + 10,
-                                     -5);
+                                     0);
             }
             _Register_elements(scene, pro);
             chara->new_proj = true;
