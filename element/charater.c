@@ -9,6 +9,8 @@
 #include "../scene/gamescene.h"
 #include <stdio.h>
 #include <stdbool.h>
+
+#define MAX_walk_area 1.7
 /*
    [Character function]
 */
@@ -72,6 +74,10 @@ void Character_update(Elements *self)
             chara->dir = true;
             chara->state = MOVE;
         }
+        else if (key_state[ALLEGRO_KEY_W] || key_state[ALLEGRO_KEY_S])
+        {
+            chara->state = MOVE;
+        }
         else
         {
             chara->state = STOP;
@@ -95,6 +101,17 @@ void Character_update(Elements *self)
             _Character_update_position(self, 5, 0);
             chara->state = MOVE;
         }
+        else if (key_state[ALLEGRO_KEY_W])
+        {
+            _Character_update_position(self, 0, -5);
+            chara->state = MOVE;
+        }
+        else if (key_state[ALLEGRO_KEY_S])
+        {
+            _Character_update_position(self, 0, 5);
+            chara->state = MOVE;
+        }
+              
         if (chara->gif_status[chara->state]->done)
             chara->state = STOP;
     }
@@ -157,6 +174,8 @@ void _Character_update_position(Elements *self, int dx, int dy)
     Character *chara = ((Character *)(self->pDerivedObj));
     chara->x += dx;
     chara->y += dy;
+    if(chara-> y < HEIGHT/MAX_walk_area)  chara ->y = HEIGHT/MAX_walk_area; //上界是畫面的1.7倍高
+    if(chara-> y > HEIGHT- chara ->height) chara ->y = HEIGHT- chara ->height;//下界不超過底部
     Shape *hitbox = chara->hitbox;
     hitbox->update_center_x(hitbox, dx);
     hitbox->update_center_y(hitbox, dy);

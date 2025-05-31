@@ -19,15 +19,16 @@ typedef struct _Projectile
     int current_frame;          // 當前 GIF 幀
     float timer;                // 計時器
     float frame_delay;          // 每幀延遲
+    float done_delay;          // 每幀延遲
     bool done;                  // GIF播放完成標誌
 } Projectile;
 Elements *New_Projectile(int label, int x, int y, int v);
-void Projectile_update(Elements *self, float delta_time);
+void Projectile_update(Elements *self, int delta_time);
 void Projectile_interact(Elements *self);
 void Projectile_draw(Elements *self);
 void Projectile_destory(Elements *self);
 void _Projectile_update_position(Elements *self, int dx, int dy);
-void _Projectile_interact_Floor(Elements *self, Elements *tar);
+void _Projectile_interact_Mushroom(Elements *self, Elements *tar);
 void _Projectile_interact_Tree(Elements *self, Elements *tar);
 
 #endif

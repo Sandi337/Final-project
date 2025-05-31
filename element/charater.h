@@ -25,6 +25,8 @@ typedef struct _Character
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime;      // counting the time of animation
     int anime_time; // indicate how long the animation
+    int health;
+    int energy;
     bool new_proj;
     Shape *hitbox; // the hitbox of object
 } Character;

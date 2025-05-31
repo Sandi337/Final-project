@@ -1,13 +1,14 @@
 #ifndef GAMESCENE_H_INCLUDED
 #define GAMESCENE_H_INCLUDED
 #include "scene.h"
+#include <allegro5/allegro_audio.h>
 
 /*
    [game scene object]
 */
 typedef enum EleType
 {
-    Floor_L,
+    Mushroom_L,
     Teleport_L,
     Tree_L,
     Character_L,
@@ -16,6 +17,8 @@ typedef enum EleType
 typedef struct _GameScene
 {
     ALLEGRO_BITMAP *background;
+    ALLEGRO_SAMPLE *song;
+    ALLEGRO_SAMPLE_INSTANCE *sample_instance;
 
 } GameScene;
 Scene *New_GameScene(int label);
