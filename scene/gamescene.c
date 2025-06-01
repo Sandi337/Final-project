@@ -31,10 +31,10 @@ Scene *New_GameScene(int label)
     srand(time(NULL));
 
     // register element
-    _Register_elements(pObj, New_Mushroom(Mushroom_L));
+    _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Teleport(Teleport_L));
     _Register_elements(pObj, New_Tree(Tree_L));
-    _Register_elements(pObj, New_Character(Character_L));
+    _Register_elements(pObj, New_Mushroom(Mushroom_L));
 
     // 隨機生成 1-3 個蘑菇
     int mushroom_count = 1 + (rand() % 3);

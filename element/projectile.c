@@ -36,16 +36,16 @@ Elements *New_Projectile(int label, int x, int y, int v)
     pDerivedObj->v = v;// GIF 設為 0 表示靜態
     pDerivedObj->current_frame = 0;
     pDerivedObj->timer = 0;
-    //pDerivedObj->frame_delay =  pDerivedObj->gif->frames[0].duration / 1000.0f;
     pDerivedObj->done_delay = 0; // 完成後延遲
     pDerivedObj->done = false;
-    pDerivedObj->hitbox = New_Circle(pDerivedObj->x + pDerivedObj->width / 2,
-                                     pDerivedObj->y + pDerivedObj->height / 2,
-                                     min(pDerivedObj->width, pDerivedObj->height) / 2);
+    pDerivedObj->hitbox = New_Circle(pDerivedObj->x ,
+                                     pDerivedObj->y ,
+                                     min(pDerivedObj->width, pDerivedObj->height) *1.5);
     
     // setting the interact object
     pObj->inter_obj[pObj->inter_len++] = Tree_L;
     pObj->inter_obj[pObj->inter_len++] = Mushroom_L;
+
     // setting derived object function函數指標
     pObj->pDerivedObj = pDerivedObj;
     pObj->Update = Projectile_update;
@@ -59,30 +59,20 @@ void Projectile_update(Elements *self, int delta_time)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
     ALGIF_FRAME *frame = &Obj->gif->frames[Obj->current_frame];
-    float frame_duration = frame->duration / 100; // 毫秒轉秒
+    float frame_duration = frame->duration / 1000; // 毫秒轉秒
     if (Obj->timer >= frame_duration) {
         Obj->current_frame++;
         Obj->timer = 0;
         if (Obj->current_frame >= Obj->gif->frames_count) {
             Obj->current_frame = Obj->gif->frames_count - 1;
-            Obj->done_delay += delta_time;
+            Obj->done_delay += delta_time/ 1000;
             if (Obj->done_delay >= 2) {
                 Obj->done = true;
             }
         }
     }
-    /*Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    if (!Obj->done) {
-        Obj->timer += delta_time;
-        if (Obj->timer >= Obj->frame_delay) {
-            Obj->current_frame++;
-            Obj->timer = 0.0f;
-            if (Obj->current_frame >= Obj->gif->frames_count) {
-                Obj->done = true; // 播放完立即消失
-            } 
-        }
-    }*/
-    //_Projectile_update_position(self, Obj->v, 0);
+    Obj->hitbox->update_center_x(Obj->hitbox, Obj->x + Obj->width / 2);
+    Obj->hitbox->update_center_y(Obj->hitbox, Obj->y + Obj->height / 2);
 }
 void _Projectile_update_position(Elements *self, int dx, int dy)
 {
@@ -115,42 +105,34 @@ void Projectile_interact(Elements *self)
 void _Projectile_interact_Mushroom(Elements *self, Elements *tar)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    if (Obj->x < 0 - Obj->width)
-        self->dele = true;
-    else if (Obj->x > WIDTH + Obj->width)
-        self->dele = true;
-}
-/*void _Projectile_interact_Mushroom(Elements *self, Elements *tar)
-{
-    Projectile *Obj = ((Projectile *)(self->pDerivedObj));
     Mushroom *mush = ((Mushroom *)(tar->pDerivedObj));
     static ALLEGRO_SAMPLE *eat_sound = NULL;
+
+    if (!eat_sound) {
+        eat_sound = al_load_sample("assets/sound/eat_sound.wav");
+        if (!eat_sound) {
+            fprintf(stderr, "Failed to load eat_sound.wav!\n");
+            exit(1);
+        }
+    }
+
     if (mush->active && !Obj->done)
-    {
-        // 圓形碰撞檢測
-        Circle *proj_hitbox = Obj->hitbox;
-        Circle *mush_hitbox = mush->hitbox;
-        
+    {        
         // 更新 hitbox 中心點（隨物件移動）
-        proj_hitbox->x = Obj->x + Obj->width / 2;
-        proj_hitbox->y = Obj->y + Obj->height / 2;
-        mush_hitbox->x = mush->x + mush->width / 2;
-        mush_hitbox->y = mush->y + mush->height / 2;
+        mush->hitbox->update_center_x(mush->hitbox, mush->x + mush->width / 2);
+        mush->hitbox->update_center_y(mush->hitbox,mush->y + mush->height / 2);
 
-        // 計算兩圓心之間的距離
-        float dx = proj_hitbox->x - mush_hitbox->x;
-        float dy = proj_hitbox->y - mush_hitbox->y;
-        float distance = sqrt(dx * dx + dy * dy);
-
-        // 如果距離小於兩半徑之和，則碰撞
-        if (distance <= (proj_hitbox->r + mush_hitbox->r))
+        // 碰撞
+        if (Obj->hitbox->overlap(Obj->hitbox, mush->hitbox))
         {
-            Obj->done = true;    // 投射物完成
+            printf("Collision detected: proj(%d, %d), mush(%d, %d)\n",
+                   Obj->x, Obj->y, mush->x, mush->y);
             mush->active = false; // 蘑菇消失
+            Obj->done = true;    // 投射物完成
             al_play_sample(eat_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
         }
     }
-}*/
+}
 void _Projectile_interact_Tree(Elements *self, Elements *tar)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
@@ -168,6 +150,7 @@ void Projectile_draw(Elements *self)
         if (frame_bitmap) {
             al_draw_bitmap(frame_bitmap, Obj->x, Obj->y, 0);
         }
+        al_draw_circle(Obj->hitbox->center_x, Obj->hitbox->center_y,  al_map_rgb(255, 0, 0), 2);
     }
 }
 void Projectile_destory(Elements *self)

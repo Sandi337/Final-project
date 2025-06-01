@@ -17,12 +17,11 @@ Elements *New_Mushroom(int label)
 {
     Mushroom *pDerivedObj = (Mushroom *)malloc(sizeof(Mushroom));
     Elements *pObj = New_Elements(label);
-    static ALLEGRO_SAMPLE *eat_sound = NULL;
     // 載入音效（僅第一次載入）
     if (!eat_sound) {
         eat_sound = al_load_sample("assets/sound/eat_sound.wav");
         if (!eat_sound) {
-            fprintf(stderr, "Failed to load eat_sound.mp3!\n");
+            fprintf(stderr, "Failed to load eat_sound.wav!\n");
             exit(1);
         }
     }
@@ -42,13 +41,15 @@ Elements *New_Mushroom(int label)
 
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
     pDerivedObj->height = al_get_bitmap_height(pDerivedObj->img);
+    pDerivedObj->r = 10;
     // 隨機位置（避免與地面重疊，假設地面在下半部）
     pDerivedObj->x = rand() % (WIDTH - pDerivedObj->width);
     pDerivedObj->y = (HEIGHT / 2) + (rand() % (HEIGHT / 2 - pDerivedObj->height));
     pDerivedObj->active = true;
-    pDerivedObj->hitbox = New_Circle(pDerivedObj->x + pDerivedObj->width / 2,
-                                     pDerivedObj->y + pDerivedObj->height / 2,
-                                     min(pDerivedObj->width, pDerivedObj->height) / 2);
+    pDerivedObj->hitbox = New_Circle(pDerivedObj->x ,
+                                     pDerivedObj->y ,
+                                     min(pDerivedObj->width, pDerivedObj->height) *2
+                                    );
 
     pObj->inter_obj[pObj->inter_len++] = Projectile_L; // 與投射物交互
     pObj->inter_obj[pObj->inter_len++] = Character_L;  // 與角色交互（後續效果）
@@ -164,6 +165,7 @@ void Mushroom_draw(Elements *self)
     Mushroom *mush = (Mushroom *)(self->pDerivedObj);
     if (mush->active) {
         al_draw_bitmap(mush->img, mush->x, mush->y, 0);
+        al_draw_circle(mush->hitbox->center_x, mush->hitbox->center_y, mush->hitbox->r, al_map_rgb(0, 255, 0), 2);
     }
 }
 

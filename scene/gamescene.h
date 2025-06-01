@@ -8,10 +8,10 @@
 */
 typedef enum EleType
 {
+    Character_L,
     Mushroom_L,
     Teleport_L,
     Tree_L,
-    Character_L,
     Projectile_L
 } EleType;
 typedef struct _GameScene

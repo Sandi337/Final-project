@@ -13,7 +13,7 @@
 
 typedef struct _Mushroom{
     ALLEGRO_BITMAP *img;
-    int x, y;
+    int x, y,r;
     int width, height;
     int type; // 0: 綠, 1: 紅, 2: 藍, 3: 彩虹
     Shape *hitbox;
