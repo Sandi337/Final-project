@@ -3,7 +3,6 @@
 #include "scene.h"
 #include <allegro5/allegro_audio.h>
 
-
 /*
    [game scene object]
 */

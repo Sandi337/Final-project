@@ -14,7 +14,6 @@ void game_init(Game *);
 bool game_update(Game *);
 void game_draw(Game *);
 void game_destroy(Game *);
-
 struct _GAME
 {
     const char *title;
