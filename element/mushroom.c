@@ -1,5 +1,6 @@
 #include "mushroom.h"
 #include "charater.h"
+#include "hud.h"
 #include "projectile.h"
 #include <stdlib.h>
 #include <time.h>
@@ -7,15 +8,29 @@
 #include "../scene/sceneManager.h" // for scene variable
 #include "../scene/gamescene.h"    // for element label
 #include <allegro5/allegro_audio.h>
+#include "../audio/audio.h"
 
 #define MIN_Y_HEIGHT_RATIO 0.7 // 新上界比例，範圍 0 到 1
 #define HEIGHT 720            // 假設螢幕高度
-
+#define clamp(v, lo, hi) ((v) < (lo) ? (lo) : ((v) > (hi) ? (hi) : (v)))
 /*
    [MUSHROOM function]
 */
 
+extern Scene *scene;
+
 static ALLEGRO_SAMPLE *eat_sound = NULL;
+
+static Elements* Get_Character_Element() {
+    ElementVec all = _Get_all_elements(scene);
+    printf("[DEBUG] Get_Character_Element checking elements\n");
+    for (int i = 0; i < all.len; i++) {
+        if (all.arr[i]->label == Character_L)
+            printf("[DEBUG] label=%d\n", all.arr[i]->label);
+            return all.arr[i];
+    }
+    return NULL;
+}
 
 Elements *New_Mushroom(int label)
 {
@@ -70,40 +85,33 @@ Elements *New_Mushroom(int label)
 
 void Mushroom_update(Elements *self, float delta_time)
 {
-    Mushroom *mush = ((Mushroom *)(self->pDerivedObj));
-    /*// 目前無需更新，保持 active 狀態
-     
-     Obj->hitbox->update_center_x(Obj->hitbox, Obj->x + Obj->width / 2);
-    Obj->hitbox->update_center_y(Obj->hitbox, Obj->y + Obj->height / 2);
-     //Shape *hitbox = Obj->hitbox;
-    //hitbox->update_center_x(hitbox, mouse.x - Obj->x);
-    //hitbox->update_center_y(hitbox, mouse.y - Obj->y);*/
-}
+    Mushroom *m = (Mushroom *)(self->pDerivedObj);
+    m->hitbox->update_center_x(m->hitbox, m->x + m->width / 2);
+    m->hitbox->update_center_y(m->hitbox, m->y + m->height / 2);
 
-void _Mushroom_update_position(Elements *self, int dx, int dy)
-{
-    Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    Obj->x += dx;
-    Obj->y += dy;
-    Shape *hitbox = Obj->hitbox;
-    hitbox->update_center_x(hitbox, dx);
-    hitbox->update_center_y(hitbox, dy);
+    if (m->x + m->width <= 1) {
+        printf("Mushroom auto delete at x = %d\n", m->x);
+        self->dele = true;
+    }
+    
 }
 
 void Mushroom_interact(Elements *self)
 {
-   
+    if (self->dele) return;
+
     for (int j = 0; j < self->inter_len; j++)
     {
         int inter_label = self->inter_obj[j];
         ElementVec labelEle = _Get_label_elements(scene, inter_label);
         for (int i = 0; i < labelEle.len; i++)
         {
-            if (inter_label == Character_L)
+            /*if (inter_label == Character_L)
             {
                 _Mushroom_interact_Character(self, labelEle.arr[i]);
             }
-            else if (inter_label == Projectile_L)
+            else*/
+            if (inter_label == Projectile_L)
             {
                 _Mushroom_interact_Projectile(self, labelEle.arr[i]);
             }
@@ -116,35 +124,74 @@ void _Mushroom_interact_Projectile(Elements *self, Elements *tar)
 {
     Mushroom *mush = (Mushroom *)(self->pDerivedObj);
     Projectile *proj = (Projectile *)(tar->pDerivedObj);
-    
-    if (mush->hitbox->overlap(mush->hitbox, proj->hitbox)) {
-        al_play_sample(eat_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
-        proj->done = true;    // 投射物完成
+    if (mush->hitbox->overlap(mush->hitbox, proj->hitbox) ) {
+        play_eat_sound();
+
+        proj->done = true;
+        mush->active = false;
         self->dele = true;
-    }
+     }
+    /*if (!mush->active || proj->done) return;
+
    
+        mush->active = false;
+        //al_play_sample(eat_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+        // 撥放音效
+        play_eat_sound();
+        proj->done = true;
+        self->dele = true;
+
+        Elements *character_ele = Get_Character_Element();  // 你需要定義這個 helper 函式
+        if (character_ele) {
+            Character *chara = (Character *)character_ele->pDerivedObj;
+            printf("[EAT] mushroom type %d hit!\n", mush->type);
+            // 根據蘑菇類型調整角色狀態
+            switch (mush->type) {
+                case 0:  // 綠色：補能量
+                    chara->energy += 5;
+                    if (chara->energy > MAX_ENERGY) chara->energy = MAX_ENERGY;
+                    break;
+                    break;
+                case 1:  // 紅色：扣血
+                    chara->health -= 10;
+                    if (chara->health < 0) chara->health = 0;
+                    break;
+                case 2:  // 藍色：扣精神
+                    chara->spirit -= 10;
+                    if (chara->spirit > MAX_SPIRIT) chara->spirit = MAX_SPIRIT;
+                    break;
+                case 3:  // 彩虹：全扣
+                    chara->health -= 5;
+                    chara->energy -= 5;
+                    chara->spirit -= 5;
+                    break;
+            }
+
+            // 限制範圍 0~100
+            if (chara->health > 100) chara->health = 100;
+            if (chara->health < 0) chara->health = 0;
+            if (chara->energy > 100) chara->energy = 100;
+            if (chara->energy < 0) chara->energy = 0;
+            if (chara->spirit > 100) chara->spirit = 100;
+            if (chara->spirit < 0) chara->spirit = 0;
+            /*if (chara->health > MAX_HEALTH) chara->health = MAX_HEALTH;
+            if (chara->energy > MAX_ENERGY) chara->energy = MAX_ENERGY;
+            if (chara->spirit > MAX_SPIRIT) chara->spirit = MAX_SPIRIT;
+
+            printf("角色數值變化後: HP=%d, EN=%d, SP=%d\n", chara->health, chara->energy, chara->spirit);
+        }
+        proj->done = true;    // 投射物完成
+        play_eat_sound();
+        mush->active = false;  
+        self->dele = true;
+    }*/
 }
 
 void _Mushroom_interact_Character(Elements *self, Elements *tar)
 {
-    Mushroom *mush = (Mushroom *)(self->pDerivedObj);
+   /* Mushroom *mush = (Mushroom *)(self->pDerivedObj);
     Character *chara = (Character *)(tar->pDerivedObj);
-    if (!mush->active) { // 蘑菇已被擊中，應用效果
-        if (chara->x >= mush->x && chara->x <= mush->x + mush->width &&
-            chara->y >= mush->y && chara->y <= mush->y + mush->height) {
-            switch (mush->type) {
-                case 0: // 綠蘑菇
-                    chara->energy += 5;
-                    break;
-                case 1: // 紅蘑菇
-                case 2: // 藍蘑菇
-                case 3: // 彩虹蘑菇
-                    chara->health -= 10;
-                    break;
-            }
-            mush->active = false; // 確保僅應用一次
-        }
-    }
+    */
 }
 
 void Mushroom_draw(Elements *self)
@@ -159,11 +206,33 @@ void Mushroom_draw(Elements *self)
 void Mushroom_destroy(Elements *self)
 {
     Mushroom *mush = (Mushroom *)(self->pDerivedObj);
+
+    // 找角色
+    Elements *character_ele = Get_Character_Element();
+    if (character_ele) {
+        Character *chara = (Character *)character_ele->pDerivedObj;
+        printf("[DESTROY] The mushroom has been eaten. Updating the character's stats...\n");
+
+        switch (mush->type) {
+            case 0: chara->energy += 5; break; // 綠色：補能量
+            case 1: chara->health -= 10; break;// 紅色：扣血
+            case 2: chara->spirit -= 10; break;// 藍色：扣精神
+            case 3:// 彩虹：全扣
+                chara->health -= 20;
+                chara->energy -= 20;
+                chara->spirit -= 20;
+                break;
+        }
+
+        // 限制 0~100
+        chara->health = clamp(chara->health, 0, MAX_HEALTH);
+        chara->energy = clamp(chara->energy, 0, MAX_ENERGY);
+        chara->spirit = clamp(chara->spirit, 0, MAX_SPIRIT);
+
+        printf("[STATUS] HP=%d EN=%d SP=%d\n", chara->health, chara->energy, chara->spirit);
+    }
+
     al_destroy_bitmap(mush->img);
-    if (eat_sound) {
-        al_destroy_sample(eat_sound); // 僅銷毀一次
-        eat_sound = NULL;
-    } 
     free(mush->hitbox);
     free(mush);
     free(self);

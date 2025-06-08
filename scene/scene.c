@@ -19,8 +19,14 @@ void _Remove_elements(Scene *scene, Elements *ele)
             {
                 parent_ptr->next = ptr->next;  
             }
+            
+            // 先釋放元素本體
+            if (ptr->ele && ptr->ele->Destroy)
+                ptr->ele->Destroy(ptr->ele);
+
             free(ptr);
-            break;
+            scene->ele_num--;
+            return;
         }
         parent_ptr = ptr;
         ptr = ptr->next;

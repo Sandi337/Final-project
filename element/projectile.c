@@ -59,25 +59,39 @@ Elements *New_Projectile(int label, int x, int y, int v)
 void Projectile_update(Elements *self,float delta_time)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
-    if (!Obj->gif || Obj->done) return; // 若已完成或無 GIF，退出
+
+    if (!Obj->gif) {
+        printf("[Projectile] No GIF loaded, skipping update.\n");
+        return;
+    }
+
+    if (delta_time <= 0.0f || delta_time > 1.0f) {
+        //printf("[Projectile] Invalid delta_time: %.4f\n", delta_time);
+    }
 
     ALGIF_FRAME *frame = &Obj->gif->frames[Obj->current_frame];
-    float frame_duration = frame->duration / 1000.0; // 毫秒轉秒
+    float frame_duration = frame->duration / 1000.0f; // 毫秒轉秒
 
+    delta_time = 0.03;
     Obj->timer += delta_time;
-    if (Obj->timer >= frame_duration) {
-        Obj->current_frame++;
-        Obj->timer = 0;
-        if (Obj->current_frame >= Obj->gif->frames_count) {
-            Obj->current_frame = Obj->gif->frames_count - 1;
-           Obj->done_delay += delta_time; // 累加延遲
-            printf("Projectile update: frame %d/%d, done_delay %.2f\n", 
-                   Obj->current_frame, Obj->gif->frames_count, Obj->done_delay);
-            if (Obj->done_delay >= 1.0) { // 延遲 1 秒後完成
-                Obj->done = true;
-            }
+
+    if (Obj->current_frame >= Obj->gif->frames_count - 1) {
+        // 播放完最後一幀：停留 + 計時刪除
+        Obj->done_delay += delta_time;
+        //printf("[Projectile] Last frame %d/%d, done_delay = %.2f\n",
+         //      Obj->current_frame, Obj->gif->frames_count, Obj->done_delay);
+        if (Obj->done_delay >= 1.0f) {
+            Obj->done = true;
+            printf("[Projectile] Animation done, marked for deletion.\n");
         }
+    } else if (Obj->timer >= frame_duration) {
+        // 前進到下一幀
+        Obj->current_frame++;
+        Obj->timer = 0.0f;
+        printf("[Projectile] Frame advanced to %d / %d\n", 
+               Obj->current_frame, Obj->gif->frames_count);
     }
+
     Obj->hitbox->update_center_x(Obj->hitbox, Obj->x + Obj->width / 2);
     Obj->hitbox->update_center_y(Obj->hitbox, Obj->y + Obj->height / 2);
 }
@@ -116,26 +130,23 @@ void _Projectile_interact_Mushroom(Elements *self, Elements *tar)
 
     if (!eat_sound) {
         eat_sound = al_load_sample("assets/sound/eat_sound.wav");
-        if (!eat_sound) {
-            fprintf(stderr, "Failed to load eat_sound.wav!\n");
-            exit(1);
-        }
     }
 
     if (mush->active && !Obj->done)
     {        
-        /*// 更新 hitbox 中心點（隨物件移動）
-        mush->hitbox->update_center_x(mush->hitbox, mush->x + mush->width / 2);
-        mush->hitbox->update_center_y(mush->hitbox,mush->y + mush->height / 2);*/
-
         // 碰撞
         if (Obj->hitbox->overlap(Obj->hitbox, mush->hitbox))
         {
             printf("Collision detected: proj(%d, %d), mush(%d, %d)\n",
                    Obj->x, Obj->y, mush->x, mush->y);
             mush->active = false; // 蘑菇消失
-            //Obj->done = true;    // 投射物完成
-            al_play_sample(eat_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+            
+            if (eat_sound) {
+                al_play_sample(eat_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
+                printf("[SOUND] eat_sound 播放成功\n");
+            } else {
+                printf("[SOUND] eat_sound 為 NULL，無法播放音效\n");
+            }
         }
     }
 }

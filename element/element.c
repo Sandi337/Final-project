@@ -11,6 +11,6 @@ Elements *New_Elements(int label)
     pObj->dele = false;
     // setting object member
     pObj->label = label;
-    pObj->pDerivedObj = pObj;
+    pObj->pDerivedObj = NULL;
     return pObj;
 }

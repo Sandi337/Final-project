@@ -4,6 +4,9 @@
 #include "element.h"
 #include "../algif5/algif.h"
 #include "../shapes/Shape.h"
+
+#define PROJECTILE_WIDTH 64
+#define PROJECTILE_HEIGHT 64
 /*
    [Projectile object]
 */

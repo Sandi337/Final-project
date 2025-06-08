@@ -11,6 +11,7 @@
 #include <stdbool.h>
 
 #define MAX_walk_area 1.7
+
 /*
    [Character function]
 */
@@ -27,11 +28,6 @@ Elements *New_Character(int label)
         sprintf(buffer, "assets/image/ichigo_%s.gif", state_string[i]);
         pDerivedObj->gif_status[i] = algif_new_gif(buffer, -1);
     }
-    // load effective sound
-    ALLEGRO_SAMPLE *sample = al_load_sample("assets/sound/Shovelsound.mp3");
-    pDerivedObj->atk_Sound = al_create_sample_instance(sample);
-    al_set_sample_instance_playmode(pDerivedObj->atk_Sound, ALLEGRO_PLAYMODE_ONCE);
-    al_attach_sample_instance_to_mixer(pDerivedObj->atk_Sound, al_get_default_mixer());
 
     // initial the geometric information of character
     pDerivedObj->width = pDerivedObj->gif_status[0]->width;
@@ -46,6 +42,9 @@ Elements *New_Character(int label)
     // initial the animation component
     pDerivedObj->state = STOP;
     pDerivedObj->new_proj = false;
+    pDerivedObj->health = 100;
+    pDerivedObj->energy = 100;
+    pDerivedObj->spirit = 100;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Draw = Character_draw;
@@ -60,22 +59,15 @@ void Character_update(Elements *self, float delta_time)
     Character *chara = ((Character *)(self->pDerivedObj));
     if (chara->state == STOP)
     {
-        /*if (key_state[ALLEGRO_KEY_SPACE])
-        {
-            chara->state = ATK;
-        }
-        else */
         if (key_state[ALLEGRO_KEY_A])
         {
             chara->dir = false;
             chara->state = MOVE;
-            _Character_update_position(self, -5, 0);
         }
         else if (key_state[ALLEGRO_KEY_D])
         {
             chara->dir = true;
             chara->state = MOVE;
-            _Character_update_position(self, 5, 0);
         }
         else if (key_state[ALLEGRO_KEY_W] || key_state[ALLEGRO_KEY_S])
         {
@@ -88,21 +80,22 @@ void Character_update(Elements *self, float delta_time)
     }
     else if (chara->state == MOVE)
     {
-        /*if (key_state[ALLEGRO_KEY_SPACE])
-        {
-            chara->state = ATK;
-        }
-        else*/ 
         if (key_state[ALLEGRO_KEY_A])
         {
             chara->dir = false;
-            _Character_update_position(self, -5, 0);
+            if (chara->x > 0) {
+                _Character_update_position(self, -5, 0);  // 不讓角色走出畫面
+            }
             chara->state = MOVE;
         }
         else if (key_state[ALLEGRO_KEY_D])
         {
             chara->dir = true;
-            _Character_update_position(self, 5, 0);
+             // 判斷是否角色還在畫面左半邊 → 允許移動；否則停下讓背景捲動
+            if (chara->x < WIDTH / 3.0f) {
+                _Character_update_position(self, +5, 0);
+            }
+            // 否則不要更新 x，背景會在 game_scene_update() 裡移動
             chara->state = MOVE;
         }
         else if (key_state[ALLEGRO_KEY_W])
@@ -121,11 +114,6 @@ void Character_update(Elements *self, float delta_time)
     }
     else if (chara->state == ATK)
     {
-        if (chara->gif_status[chara->state]->done)
-        {
-            chara->state = STOP;
-            chara->new_proj = false;
-        }
         if (chara->gif_status[ATK]->display_index == 2 && chara->new_proj == false)
         {
             Elements *pro;
@@ -145,6 +133,13 @@ void Character_update(Elements *self, float delta_time)
             }
             _Register_elements(scene, pro);
             chara->new_proj = true;
+            
+            //al_play_sample_instance(chara->atk_Sound);
+        }
+        if (chara->gif_status[chara->state]->done)
+        {
+            chara->state = STOP;
+            chara->new_proj = false;
         }
     }
 }
@@ -157,15 +152,15 @@ void Character_draw(Elements *self)
     {
         al_draw_bitmap(frame, chara->x, chara->y, ((chara->dir) ? ALLEGRO_FLIP_HORIZONTAL : 0));
     }
-    if (chara->state == ATK && chara->gif_status[chara->state]->display_index == 2)
+    /*if (chara->state == ATK && chara->gif_status[chara->state]->display_index == 2)
     {
         al_play_sample_instance(chara->atk_Sound);
-    }
+    }*/
 }
 void Character_destory(Elements *self)
 {
     Character *Obj = ((Character *)(self->pDerivedObj));
-    al_destroy_sample_instance(Obj->atk_Sound);
+    //al_destroy_sample_instance(Obj->atk_Sound);
     for (int i = 0; i < 3; i++)
         algif_destroy_animation(Obj->gif_status[i]);
     free(Obj->hitbox);

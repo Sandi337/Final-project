@@ -6,6 +6,10 @@
 #include "../algif5/algif.h"
 #include <stdbool.h>
 
+#define MAX_HEALTH 100
+#define MAX_ENERGY 100
+#define MAX_SPIRIT 100
+
 /*
    [character object]
 */
@@ -27,6 +31,7 @@ typedef struct _Character
     int anime_time; // indicate how long the animation
     int health;
     int energy;
+    int spirit;
     bool new_proj;
     Shape *hitbox; // the hitbox of object
 } Character;

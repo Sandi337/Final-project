@@ -1,6 +1,10 @@
 #include <allegro5/allegro_audio.h>
+#include "../audio/audio.h"
+#include <allegro5/allegro_font.h>
+
 #include "gamescene.h"
 #include "../element/charater.h"
+#include "../element/hud.h"
 #include "../element/element.h"
 #include "../element/mushroom.h"
 #include "../element/teleport.h"
@@ -11,6 +15,7 @@
 #include "../element/Legend.h"*/
 
 #define FPS 60
+#define MIN_MUSHROOM_DISTANCE 200  // 蘑菇之間最小距離（像素）
 /*
    [GameScene function]
 */
@@ -18,6 +23,8 @@ Scene *New_GameScene(int label)
 {
     GameScene *pDerivedObj = (GameScene *)malloc(sizeof(GameScene));
     Scene *pObj = New_Scene(label);
+    // Load font
+    pDerivedObj->font = al_load_font("assets/font/ByteBounce.ttf", 35, 0);
     // Load sound
     pDerivedObj->song = al_load_sample("assets/sound/main_music.mp3");
     pDerivedObj->sample_instance = al_create_sample_instance(pDerivedObj->song);
@@ -36,8 +43,8 @@ Scene *New_GameScene(int label)
     }
     // Initialize scroll variables
     pDerivedObj->bg_offset_x = 0.0;
-    pDerivedObj->scroll_speed = 0.2; // 根據需求調整
-
+    pDerivedObj->scroll_speed = 1.0; // 根據需求調整
+    pDerivedObj->start_time = al_get_time();
     pObj->pDerivedObj = pDerivedObj;
 
     // 初始化隨機數生成器
@@ -54,8 +61,35 @@ Scene *New_GameScene(int label)
 
     // 隨機生成 1-3 個蘑菇
     int mushroom_count = 1 + (rand() % 3);
-    for (int i = 0; i < mushroom_count; i++) {
-        _Register_elements(pObj, New_Mushroom(Mushroom_L));
+    int placed = 0;
+
+    while (placed < mushroom_count) {
+        Elements *new_mush = New_Mushroom(Mushroom_L);
+        Mushroom *mushA = (Mushroom *)new_mush->pDerivedObj;
+
+        bool too_close = false;
+        ElementVec all = _Get_all_elements(pObj);
+        for (int j = 0; j < all.len; j++) {
+            if (all.arr[j]->label != Mushroom_L) continue;
+            Mushroom *mushB = (Mushroom *)all.arr[j]->pDerivedObj;
+
+            float dx = mushA->x - mushB->x;
+            float dy = mushA->y - mushB->y;
+            float dist = sqrtf(dx * dx + dy * dy);
+
+            if (dist < MIN_MUSHROOM_DISTANCE) {
+                too_close = true;
+                break;
+            }
+        }
+
+        if (!too_close) {
+            _Register_elements(pObj, new_mush);
+            placed++;
+        } else {
+            // 太近了就重做這顆
+            Mushroom_destroy(new_mush);
+        }
     }
 
 
@@ -65,6 +99,7 @@ Scene *New_GameScene(int label)
     pObj->Destroy = game_scene_destroy;
     return pObj;
 }
+
 void game_scene_update(Scene *self, float delta_time)
 {
     // update every element
@@ -79,15 +114,66 @@ void game_scene_update(Scene *self, float delta_time)
             break;
         }
     }
+    // === 1. 背景與元素滾動邏輯 ===
+    bool should_scroll = (chara && chara->state == MOVE && chara->dir && chara->x > WIDTH / 3.0);
+    if (should_scroll) {
+        gs->bg_offset_x += gs->scroll_speed;
 
-    if (chara && chara->state != STOP) {
-        float threshold = WIDTH / 3.0;
-        if (chara->x > threshold && chara->dir) {
-            gs->bg_offset_x -= gs->scroll_speed;
-        } else if (chara->x < threshold && !chara->dir) {
-            gs->bg_offset_x += gs->scroll_speed;
+        // 同步所有非角色元素向左位移
+        for (int i = 0; i < allEle.len; i++) {
+            Elements *ele = allEle.arr[i];
+            if (ele->label == Character_L) continue;
+            if (ele->label == Mushroom_L) {
+                Mushroom *m = (Mushroom *)ele->pDerivedObj;
+                m->x -= gs->scroll_speed;
+                //printf("[MUSHROOM] x=%d width=%d\n", m->x, m->width);
+                if (m->x <= 0) {
+                    
+                    ele->dele = true;
+                }
+            }
+            else if (ele->label == Tree_L) {
+                Tree *t = (Tree *)ele->pDerivedObj;
+                t->x -= gs->scroll_speed;
+            }
+            else if (ele->label == Teleport_L) {
+                Teleport *tp = (Teleport *)ele->pDerivedObj;
+                tp->x -= gs->scroll_speed;
+            }
         }
+        
+            // 背景移動時，讓新蘑菇在右邊生成
+        if ((int)gs->bg_offset_x % 500 == 0) {
+            int mush_count = 1 + rand() % 3;
+            int placed = 0;
+            while (placed < mush_count) {
+                Elements *new_mush = New_Mushroom(Mushroom_L);
+                Mushroom *mushA = (Mushroom *)new_mush->pDerivedObj;
+                mushA->x += WIDTH;  // 新蘑菇放在畫面右側外一點
 
+                bool too_close = false;
+                ElementVec exist = _Get_all_elements(self);
+                for (int j = 0; j < exist.len; j++) {
+                    if (exist.arr[j]->label != Mushroom_L) continue;
+                    Mushroom *mushB = (Mushroom *)exist.arr[j]->pDerivedObj;
+                    float dx = mushA->x - mushB->x;
+                    float dy = mushA->y - mushB->y;
+                    float dist = sqrtf(dx * dx + dy * dy);
+                    if (dist < 100) {
+                        too_close = true;
+                        break;
+                    }
+                }
+
+                if (!too_close) {
+                    _Register_elements(self, new_mush);
+                    placed++;
+                } else {
+                    Mushroom_destroy(new_mush);
+                }
+            }
+        }
+        
         int bg_width = al_get_bitmap_width(gs->background);
         gs->bg_offset_x = fmod(gs->bg_offset_x, bg_width);
         if (gs->bg_offset_x < 0) gs->bg_offset_x += bg_width;
@@ -105,26 +191,17 @@ void game_scene_update(Scene *self, float delta_time)
                     mouse.y >= mush->y && mouse.y <= mush->y + mush->height) {
                     printf("Mushroom hit at (%d, %d), width: %d, height: %d\n", 
                     mush->x, mush->y, mush->width, mush->height); // 確認碰撞
-                    // 觸發採集動作
+                    
                     // 觸發主角採集動作
                     if (chara) {
                         chara->state = ATK;
+                        chara->new_proj = false; // 重設投射物標記
+                        chara->gif_status[ATK]->done = false; 
                         printf("Character state set to ATK\n"); // 確認狀態變化
                     }
-                    // 創建臨時投射物顯示挖洞 GIF
-                    Elements *proj = New_Projectile(Projectile_L, mush->x, mush->y, 0); // 靜止投射物
-                    if (proj) {
-                        _Register_elements(self, proj);
-                        float delta_time = 1.0 / FPS; // 確保 delta_time 定義
-                        proj->Update(proj, delta_time); // 立即更新一次
-                        printf("Projectile created at (%d, %d)\n", mush->x, mush->y);
-                    }
-                    // 播放音效（假設音效已加載）
-                    if (gs->sample_instance) {
-                        al_set_sample_instance_position(gs->sample_instance, 0); // 重置音效位置
-                        al_play_sample_instance(gs->sample_instance); // 播放採集音效
-                        printf("Dig sound played\n"); // 確認音效
-                    }
+                    
+                    //挖土音效
+                    play_dig_sound();
                     ele->dele = true; // 標記蘑菇刪除
                     printf("Mushroom marked for deletion\n"); // 確認刪除
                 }
@@ -134,21 +211,22 @@ void game_scene_update(Scene *self, float delta_time)
         mouse_state[1] = false;
     }
     
-    for (int i = 0; i < allEle.len; i++)
-    {
-        Elements *ele = allEle.arr[i];
-        if (ele->label != Projectile_L || !((Projectile *)ele->pDerivedObj)->done) {
-            ele->Update(ele, delta_time);
-        }
-        //ele->Update(ele);
-
-        Character *chara = NULL;
+    // 更新所有元素
+    for (int i = 0; i < allEle.len; i++) {
+        allEle.arr[i]->Update(allEle.arr[i], delta_time);
     }
-    // 檢查投射物的 done 旗標
-    /*if (ele->label == Projectile_L && ((Projectile *)ele->pDerivedObj)->done)
-    {
-        ele->dele = true; // 標記為刪除
-    }*/
+
+    // 額外標記完成動畫的 Projectile 為 dele
+    for (int i = 0; i < allEle.len; i++) {
+        Elements *ele = allEle.arr[i];
+        if (ele->label == Projectile_L) {
+            Projectile *proj = (Projectile *)ele->pDerivedObj;
+            if (proj->done) {
+                ele->dele = true;
+            }
+        }
+    }
+    
     // run interact for every element
     for (int i = 0; i < allEle.len; i++)
     {
@@ -161,18 +239,18 @@ void game_scene_update(Scene *self, float delta_time)
         Elements *ele = allEle.arr[i];
         if (ele->dele)
          {
-            ele->Destroy(ele);
             _Remove_elements(self, ele);
         }
     }
 }
+
 void game_scene_draw(Scene *self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     GameScene *gs = ((GameScene *)(self->pDerivedObj));
-        
+    Character *chara = NULL;
     if (gs->background) {
-        int bg_width = al_get_bitmap_width(gs->background);
+        //int bg_width = al_get_bitmap_width(gs->background);
         int bg_height = al_get_bitmap_height(gs->background);
         // Draw the background with offset
         al_draw_bitmap_region(gs->background, 
@@ -189,11 +267,46 @@ void game_scene_draw(Scene *self)
         
     }
     ElementVec allEle = _Get_all_elements(self);
-    for (int i = 0; i < allEle.len; i++)
-    {
-        Elements *ele = allEle.arr[i];
-        ele->Draw(ele);
+    // 先畫低層元素（例如蘑菇、樹）
+    for (int i = 0; i < allEle.len; i++) {
+        if (allEle.arr[i]->label == Mushroom_L || allEle.arr[i]->label == Tree_L)
+            allEle.arr[i]->Draw(allEle.arr[i]);
     }
+
+    // 接著畫主角
+    for (int i = 0; i < allEle.len; i++) {
+        if (allEle.arr[i]->label == Character_L){
+            allEle.arr[i]->Draw(allEle.arr[i]);
+            chara = (Character *)allEle.arr[i]->pDerivedObj;
+            break;
+        }
+    }
+
+    // 最後畫其他東西（像是投射物、Pause 按鈕等）
+    for (int i = 0; i < allEle.len; i++) {
+        int label = allEle.arr[i]->label;
+        if (label != Character_L && label != Mushroom_L && label != Tree_L)
+            allEle.arr[i]->Draw(allEle.arr[i]);
+    }
+    // 繪製 status HUD
+    Draw_HUD(chara, gs->font, WIDTH);
+    //計時器
+    double now = al_get_time();
+    double elapsed = now - gs->start_time;
+    int remaining = (180 - (int)elapsed); // 180秒
+
+    if (remaining < 0) {
+        // TODO: 轉場、暫停、顯示結束畫面
+        remaining = 0;
+    }
+
+    int minutes = remaining / 60;
+    int seconds = remaining % 60;
+
+    char time_buf[32];
+    sprintf(time_buf, "Time: %02d:%02d", minutes, seconds);
+
+    al_draw_text(gs->font, al_map_rgb(255, 255, 255), WIDTH - 150, 110, 0, time_buf);
 }
 void game_scene_destroy(Scene *self)
 {

@@ -46,7 +46,10 @@ void Pause_button_interact(Elements *self) {}
 void Pause_button_draw(Elements *self)
 {
     Pause_button *Obj = ((Pause_button *)(self->pDerivedObj));
-    al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    bool is_visible = false;
+    if(is_visible){
+        al_draw_bitmap(Obj->img, Obj->x, Obj->y, 0);
+    }
 }
 void Pause_button_destory(Elements *self)
 {
