@@ -1,6 +1,6 @@
 #include "Mousesign.h"
 #include "Pause_button.h"
-#include "charater.h"
+#include "../element/charater.h"
 #include "../shapes/Circle.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable

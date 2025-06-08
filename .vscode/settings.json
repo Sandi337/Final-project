@@ -21,6 +21,19 @@
 		"circle.h": "c",
 		"allegro_acodec.h": "c",
 		"allegro_font.h": "c",
-		"allegro_ttf.h": "c"
+		"allegro_ttf.h": "c",
+		"time.h": "c",
+		"hud.h": "c",
+		"rectangle.h": "c",
+		"gardendoor.h": "c",
+		"gardenscene.h": "c",
+		"mushrooms_red.h": "c",
+		"mushrooms_green.h": "c",
+		"mushrooms_purple.h": "c",
+		"legend.h": "c",
+		"continue.h": "c",
+		"scene.h": "c",
+		"element_label.h": "c",
+		"allegro_color.h": "c"
 	}
 }

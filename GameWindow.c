@@ -42,7 +42,8 @@ void execute(Game *self)
         {
         case ALLEGRO_EVENT_TIMER:
         {
-            run &= self->game_update(self);
+            float delta_time = 1.0 / 60.0;
+            run &= self->game_update(self, delta_time);
             self->game_draw(self);
             break;
         }
@@ -135,9 +136,9 @@ void game_init(Game *self)
         fprintf(stderr, "Failed to load custom cursor: assets/image/cursor.png\n");
     }
 }
-bool game_update(Game *self)
+bool game_update(Game *self, float delta_time)
 {
-    scene->Update(scene);
+    scene->Update(scene, delta_time);
     if (scene->scene_end)
     {
         scene->Destroy(scene);
@@ -148,6 +149,12 @@ bool game_update(Game *self)
             break;
         case 1:
             create_scene(GameScene_L);
+            break;
+        case 2: 
+            create_scene(GardenScene_L); 
+            break;
+        case 3: 
+            create_scene(SeaScene_L); 
             break;
         case -1:
             return false;

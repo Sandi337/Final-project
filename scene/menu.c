@@ -36,7 +36,7 @@ Scene *New_Menu(int label)
     pObj->Destroy = menu_destroy;
     return pObj;
 }
-void menu_update(Scene *self)
+void menu_update(Scene *self, float delta_time)
 {
     if (key_state[ALLEGRO_KEY_ENTER])
     {

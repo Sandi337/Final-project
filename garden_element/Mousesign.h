@@ -1,6 +1,6 @@
 #ifndef Mousesign_H_INCLUDED
 #define Mousesign_H_INCLUDED
-#include "element.h"
+#include "../element/element.h"
 #include "../scene/gamescene.h" // for element label
 #include "../shapes/Shape.h"
 #include <allegro5/allegro_color.h>
@@ -18,7 +18,7 @@ typedef struct _Mousesign
     ALLEGRO_BITMAP *hand_img;
 } Mousesign;
 Elements *New_Mousesign(int label);
-void Mousesign_update(Elements *self,float delta_time);
+void Mousesign_update(Elements *self, float delta_time);
 void Mousesign_interact(Elements *self);
 void Mousesign_draw(Elements *self);
 void Mousesign_destory(Elements *self);

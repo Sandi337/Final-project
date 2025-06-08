@@ -18,6 +18,7 @@ typedef struct _Mushroom{
     int type; // 0: 綠, 1: 紅, 2: 藍, 3: 彩虹
     Shape *hitbox;
     bool active;
+    bool was_clicked;
 } Mushroom;
 
 Elements *New_Mushroom(int label);

@@ -6,12 +6,12 @@
 typedef struct _GAME Game;
 typedef void (*fptrGameExecute)(Game *);
 typedef void (*fptrGameInit)(Game *);
-typedef bool (*fptrGameUpdate)(Game *);
+typedef bool (*fptrGameUpdate)(Game *, float);
 typedef void (*fptrGameDraw)(Game *);
 typedef void (*fptrGameDestroy)(Game *);
 void execute(Game *);
 void game_init(Game *);
-bool game_update(Game *);
+bool game_update(Game *, float delta_time);
 void game_draw(Game *);
 void game_destroy(Game *);
 struct _GAME

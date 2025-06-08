@@ -12,5 +12,9 @@ Elements *New_Elements(int label)
     // setting object member
     pObj->label = label;
     pObj->pDerivedObj = NULL;
+    pObj->Update = NULL;
+    pObj->Interact = NULL;
+    pObj->Draw = NULL;
+    pObj->Destroy = NULL;
     return pObj;
 }

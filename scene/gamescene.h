@@ -1,22 +1,24 @@
 #ifndef GAMESCENE_H_INCLUDED
 #define GAMESCENE_H_INCLUDED
 #include "scene.h"
+#include "../element/element_label.h"  
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_font.h>
 
 /*
    [game scene object]
 */
-typedef enum EleType
+/*typedef enum EleType
 {
     Character_L,
     Hud_L,
     Mushroom_L,
-    Teleport_L,
+    Vine_L,
     Tree_L,
+    Gardendoor_L,
     Projectile_L,
     Pause_button_L
-} EleType;
+} EleType;*/
 typedef struct _GameScene
 {
     ALLEGRO_BITMAP *background;
@@ -27,6 +29,9 @@ typedef struct _GameScene
     float scroll_speed;         // 滾動速度
     int width, height;
     double start_time;          //倒計時器
+    float energy_timer;         // 每 3 秒扣能量
+    bool garden_portal_spawned;
+    double garden_portal_timer;
 
 } GameScene;
 Scene *New_GameScene(int label);

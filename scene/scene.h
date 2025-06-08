@@ -19,7 +19,7 @@ typedef struct Element_vector
     int len;
 } ElementVec;
 typedef struct _Scene Scene;
-typedef void (*fptrUpdate)(Scene *);
+typedef void (*fptrUpdate)(Scene *, float);
 typedef void (*fptrDraw)(Scene *);
 typedef void (*fptrDestroy)(Scene *);
 struct _Scene

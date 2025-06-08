@@ -8,5 +8,6 @@ void play_bgm();
 void stop_bgm();
 void play_dig_sound();
 void play_eat_sound();
+void play_hurt_sound();
 
 #endif

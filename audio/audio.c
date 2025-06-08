@@ -7,6 +7,7 @@ static ALLEGRO_SAMPLE *bgm = NULL;
 static ALLEGRO_SAMPLE_INSTANCE *bgm_instance = NULL;
 static ALLEGRO_SAMPLE *dig_sound = NULL;
 static ALLEGRO_SAMPLE *eat_sound = NULL;
+static ALLEGRO_SAMPLE *hurt_sound = NULL;
 
 void AudioManager_Init() {
     bgm = al_load_sample("assets/sound/main_music.mp3");
@@ -25,6 +26,16 @@ void AudioManager_Init() {
     if (!eat_sound) {
         fprintf(stderr, "Failed to load eat_sound.wav\n");
     }
+}
+void play_hurt_sound() {
+    if (!hurt_sound) {
+        hurt_sound = al_load_sample("assets/sound/hit_2.wav");
+        if (!hurt_sound) {
+            fprintf(stderr, "Failed to load hit_2.wav\n");
+            return;
+        }
+    }
+    al_play_sample(hurt_sound, 1.0, 0.0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 }
 void play_dig_sound(void) {
     if (!dig_sound) {
@@ -55,3 +66,4 @@ void stop_bgm() {
 void play_eat_sound() {
     if (eat_sound) al_play_sample(eat_sound, 1.0, 0, 1.0, ALLEGRO_PLAYMODE_ONCE, NULL);
 }
+

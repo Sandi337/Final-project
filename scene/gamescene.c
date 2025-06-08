@@ -3,14 +3,15 @@
 #include <allegro5/allegro_font.h>
 
 #include "gamescene.h"
+
 #include "../element/charater.h"
 #include "../element/hud.h"
 #include "../element/element.h"
 #include "../element/mushroom.h"
-#include "../element/teleport.h"
+#include "../element/vine.h"
 #include "../element/tree.h"
+#include "../element/gardendoor.h"
 #include "../element/projectile.h"
-#include "../element/Pause_button.h"
 /*#include "../element/Continue.h"
 #include "../element/Legend.h"*/
 
@@ -45,6 +46,9 @@ Scene *New_GameScene(int label)
     pDerivedObj->bg_offset_x = 0.0;
     pDerivedObj->scroll_speed = 1.0; // 根據需求調整
     pDerivedObj->start_time = al_get_time();
+    pDerivedObj->energy_timer = 0.0;
+    pDerivedObj->garden_portal_spawned = false;
+    pDerivedObj->garden_portal_timer = 0.0;
     pObj->pDerivedObj = pDerivedObj;
 
     // 初始化隨機數生成器
@@ -52,10 +56,11 @@ Scene *New_GameScene(int label)
 
     // register element
     _Register_elements(pObj, New_Character(Character_L));
-    _Register_elements(pObj, New_Teleport(Teleport_L));
+    _Register_elements(pObj, New_Vine(Vine_L));
     _Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Mushroom(Mushroom_L));
-    _Register_elements(pObj, New_Pause_button(Pause_button_L));
+    //_Register_elements(pObj, New_Pause_button(Pause_button_L));
+    _Register_elements(pObj, New_Gardendoor(Gardendoor_L));
     /*_Register_elements(pObj, New_Continue(Continue_L));
     _Register_elements(pObj, New_Legend(Legend_L));*/
 
@@ -91,8 +96,6 @@ Scene *New_GameScene(int label)
             Mushroom_destroy(new_mush);
         }
     }
-
-
     // setting derived object function
     pObj->Update = game_scene_update;
     pObj->Draw = game_scene_draw;
@@ -113,6 +116,16 @@ void game_scene_update(Scene *self, float delta_time)
             chara = (Character *)allEle.arr[i]->pDerivedObj;
             break;
         }
+    }
+    // 能量每 5 秒扣 5 點
+    //delta_time =  1.0 / 60 ;//每秒更新 60 次
+    gs->energy_timer += delta_time;
+    if (gs->energy_timer >= 5.0f && chara) {
+        chara->energy -= 5;
+        if (chara->energy < 0) chara->energy = 0;
+        gs->energy_timer = 0.0f;
+
+        printf("[TIMER]Auto deduct energy every 5 seconds, remaining Energy = %d\n", chara->energy);
     }
     // === 1. 背景與元素滾動邏輯 ===
     bool should_scroll = (chara && chara->state == MOVE && chara->dir && chara->x > WIDTH / 3.0);
@@ -136,8 +149,8 @@ void game_scene_update(Scene *self, float delta_time)
                 Tree *t = (Tree *)ele->pDerivedObj;
                 t->x -= gs->scroll_speed;
             }
-            else if (ele->label == Teleport_L) {
-                Teleport *tp = (Teleport *)ele->pDerivedObj;
+            else if (ele->label == Vine_L) {
+                Vine *tp = (Vine *)ele->pDerivedObj;
                 tp->x -= gs->scroll_speed;
             }
         }
@@ -190,8 +203,9 @@ void game_scene_update(Scene *self, float delta_time)
                 if (mouse.x >= mush->x && mouse.x <= mush->x + mush->width &&
                     mouse.y >= mush->y && mouse.y <= mush->y + mush->height) {
                     printf("Mushroom hit at (%d, %d), width: %d, height: %d\n", 
-                    mush->x, mush->y, mush->width, mush->height); // 確認碰撞
+                            mush->x, mush->y, mush->width, mush->height); // 確認碰撞
                     
+                    mush->was_clicked = true;
                     // 觸發主角採集動作
                     if (chara) {
                         chara->state = ATK;
@@ -209,6 +223,22 @@ void game_scene_update(Scene *self, float delta_time)
         }
         // 重置鼠標狀態，避免重複觸發
         mouse_state[1] = false;
+    }
+    // 每 5 秒檢查一次精神值是否 < 75，如果是，生成花園入口
+    if (chara && chara->spirit < 75) {
+        gs->garden_portal_timer += delta_time;
+        if (gs->garden_portal_timer >= 5.0) {
+            printf("[GARDEN] Spirit < 75 -> Randomly spawning garden portal...\n");
+            Elements *portal = New_Gardendoor(Gardendoor_L);
+            Gardendoor *door = (Gardendoor *)(portal->pDerivedObj);
+            door->x = rand() % (WIDTH - door->width);
+            door->y = HEIGHT - door->height - 10;
+            _Register_elements(self, portal);
+
+            gs->garden_portal_timer = 0.0;
+        }
+    } else {
+        gs->garden_portal_timer = 0.0; // 如果精神值回到 >=75，重置計時器
     }
     
     // 更新所有元素
@@ -269,7 +299,12 @@ void game_scene_draw(Scene *self)
     ElementVec allEle = _Get_all_elements(self);
     // 先畫低層元素（例如蘑菇、樹）
     for (int i = 0; i < allEle.len; i++) {
-        if (allEle.arr[i]->label == Mushroom_L || allEle.arr[i]->label == Tree_L)
+        if (
+            allEle.arr[i]->label == Mushroom_L || 
+            allEle.arr[i]->label == Tree_L || 
+            allEle.arr[i]->label == Vine_L || 
+            allEle.arr[i]->label == Gardendoor_L 
+        )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }
 
@@ -285,7 +320,12 @@ void game_scene_draw(Scene *self)
     // 最後畫其他東西（像是投射物、Pause 按鈕等）
     for (int i = 0; i < allEle.len; i++) {
         int label = allEle.arr[i]->label;
-        if (label != Character_L && label != Mushroom_L && label != Tree_L)
+        if (label != Character_L &&
+             label != Mushroom_L && 
+             label != Tree_L && 
+             allEle.arr[i]->label != Vine_L &&
+             allEle.arr[i]->label != Gardendoor_L
+            )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }
     // 繪製 status HUD
