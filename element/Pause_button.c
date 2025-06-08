@@ -27,7 +27,7 @@ Elements *New_Pause_button(int label)
     pObj->Destroy = Pause_button_destory;
     return pObj;
 }
-void Pause_button_update(Elements *self) {
+void Pause_button_update(Elements *self, float delta_time) {
     Pause_button *Obj = (Pause_button *)(self->pDerivedObj);
 
     // 判斷是否點擊到按鈕

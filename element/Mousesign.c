@@ -45,7 +45,7 @@ void _Mousesign_update_position(Elements *self, int dx, int dy)
     hitbox->update_center_x(hitbox, dx);
     hitbox->update_center_y(hitbox, dy);
 }
-void Mousesign_update(Elements *self)
+void Mousesign_update(Elements *self, float delta_time)
 {
     Mousesign *Obj = ((Mousesign *)(self->pDerivedObj));
     _Mousesign_update_position(self, mouse.x-Obj->x, mouse.y-Obj->y);

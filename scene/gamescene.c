@@ -55,7 +55,7 @@ Scene *New_GameScene(int label)
     // 隨機生成 1-3 個蘑菇
     int mushroom_count = 1 + (rand() % 3);
     for (int i = 0; i < mushroom_count; i++) {
-        _Register_elements(pObj, New_Mushroom(MUSHROOM_L));
+        _Register_elements(pObj, New_Mushroom(Mushroom_L));
     }
 
 
@@ -65,7 +65,7 @@ Scene *New_GameScene(int label)
     pObj->Destroy = game_scene_destroy;
     return pObj;
 }
-void game_scene_update(Scene *self)
+void game_scene_update(Scene *self, float delta_time)
 {
     // update every element
     ElementVec allEle = _Get_all_elements(self);
@@ -94,8 +94,8 @@ void game_scene_update(Scene *self)
     }
 
     // 檢查鼠標點擊並處理蘑菇
-    float delta_time = 1.0 / FPS; // 假設 FPS 為 60
     if (mouse_state[1]) { // 左鍵點擊
+        printf("Mouse clicked at (%.0f, %.0f)\n", mouse.x, mouse.y);  // 確認點擊位置
         for (int i = 0; i < allEle.len; i++) {
             Elements *ele = allEle.arr[i];
             if (ele->label == Mushroom_L) {
@@ -103,21 +103,30 @@ void game_scene_update(Scene *self)
                 // 假設 Mushroom 有 x, y, width, height 成員
                 if (mouse.x >= mush->x && mouse.x <= mush->x + mush->width &&
                     mouse.y >= mush->y && mouse.y <= mush->y + mush->height) {
+                    printf("Mushroom hit at (%d, %d), width: %d, height: %d\n", 
+                    mush->x, mush->y, mush->width, mush->height); // 確認碰撞
                     // 觸發採集動作
                     // 觸發主角採集動作
-                    if (chara) chara->state = ATK;
+                    if (chara) {
+                        chara->state = ATK;
+                        printf("Character state set to ATK\n"); // 確認狀態變化
+                    }
                     // 創建臨時投射物顯示挖洞 GIF
                     Elements *proj = New_Projectile(Projectile_L, mush->x, mush->y, 0); // 靜止投射物
                     if (proj) {
                         _Register_elements(self, proj);
-                        proj->Update(proj/*, delta_time*/); // 立即更新一次
+                        float delta_time = 1.0 / FPS; // 確保 delta_time 定義
+                        proj->Update(proj, delta_time); // 立即更新一次
+                        printf("Projectile created at (%d, %d)\n", mush->x, mush->y);
                     }
                     // 播放音效（假設音效已加載）
                     if (gs->sample_instance) {
                         al_set_sample_instance_position(gs->sample_instance, 0); // 重置音效位置
                         al_play_sample_instance(gs->sample_instance); // 播放採集音效
+                        printf("Dig sound played\n"); // 確認音效
                     }
                     ele->dele = true; // 標記蘑菇刪除
+                    printf("Mushroom marked for deletion\n"); // 確認刪除
                 }
             }
         }
@@ -129,7 +138,7 @@ void game_scene_update(Scene *self)
     {
         Elements *ele = allEle.arr[i];
         if (ele->label != Projectile_L || !((Projectile *)ele->pDerivedObj)->done) {
-            ele->Update(ele/*, delta_time*/);
+            ele->Update(ele, delta_time);
         }
         //ele->Update(ele);
 
@@ -151,7 +160,10 @@ void game_scene_update(Scene *self)
     {
         Elements *ele = allEle.arr[i];
         if (ele->dele)
+         {
+            ele->Destroy(ele);
             _Remove_elements(self, ele);
+        }
     }
 }
 void game_scene_draw(Scene *self)

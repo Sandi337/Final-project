@@ -4,6 +4,8 @@
 #include "../shapes/Circle.h"
 #include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
+
+static ALLEGRO_SAMPLE *eat_sound = NULL; // 蘑菇被擊中音
 /*
    [Projectile function]
 */
@@ -54,7 +56,7 @@ Elements *New_Projectile(int label, int x, int y, int v)
 
     return pObj;
 }
-void Projectile_update(Elements *self, float delta_time)
+void Projectile_update(Elements *self,float delta_time)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
     if (!Obj->gif || Obj->done) return; // 若已完成或無 GIF，退出
@@ -66,11 +68,11 @@ void Projectile_update(Elements *self, float delta_time)
     if (Obj->timer >= frame_duration) {
         Obj->current_frame++;
         Obj->timer = 0;
-        delta_time = 1;
         if (Obj->current_frame >= Obj->gif->frames_count) {
             Obj->current_frame = Obj->gif->frames_count - 1;
            Obj->done_delay += delta_time; // 累加延遲
-            printf("done_delay: %.2f, delta_time: %.2f\n", Obj->done_delay, delta_time);
+            printf("Projectile update: frame %d/%d, done_delay %.2f\n", 
+                   Obj->current_frame, Obj->gif->frames_count, Obj->done_delay);
             if (Obj->done_delay >= 1.0) { // 延遲 1 秒後完成
                 Obj->done = true;
             }
@@ -111,7 +113,6 @@ void _Projectile_interact_Mushroom(Elements *self, Elements *tar)
 {
     Projectile *Obj = ((Projectile *)(self->pDerivedObj));
     Mushroom *mush = ((Mushroom *)(tar->pDerivedObj));
-    static ALLEGRO_SAMPLE *eat_sound = NULL;
 
     if (!eat_sound) {
         eat_sound = al_load_sample("assets/sound/eat_sound.wav");
@@ -164,4 +165,11 @@ void Projectile_destory(Elements *self)
     free(Obj->hitbox);
     free(Obj);
     free(self);
+}
+void Projectile_release_sound()
+{
+    if (eat_sound) {
+        al_destroy_sample(eat_sound);
+        eat_sound = NULL;
+    }
 }

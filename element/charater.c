@@ -54,7 +54,7 @@ Elements *New_Character(int label)
     pObj->Destroy = Character_destory;
     return pObj;
 }
-void Character_update(Elements *self)
+void Character_update(Elements *self, float delta_time)
 {
     // use the idea of finite state machine to deal with different state
     Character *chara = ((Character *)(self->pDerivedObj));

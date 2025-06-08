@@ -12,6 +12,7 @@
 #include <allegro5/allegro_ttf.h>
 // include scene and following component
 #include "scene/sceneManager.h"
+#include "element/projectile.h"
 #include <stdbool.h>
 
 Game *New_Game()
@@ -169,6 +170,7 @@ void game_destroy(Game *self)
     al_destroy_event_queue(event_queue);
     al_destroy_display(self->display);
     scene->Destroy(scene);
+    Projectile_release_sound();
     al_destroy_mouse_cursor(self->custom_cursor); // 釋放自定義鼠標
     free(self);
 }

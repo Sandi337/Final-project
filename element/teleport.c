@@ -27,7 +27,7 @@ Elements *New_Teleport(int label)
     pObj->Destroy = Teleport_destory;
     return pObj;
 }
-void Teleport_update(Elements *self)
+void Teleport_update(Elements *self, float delta_time)
 {
     Teleport *Obj = ((Teleport *)(self->pDerivedObj));
     if (key_state[ALLEGRO_KEY_W])

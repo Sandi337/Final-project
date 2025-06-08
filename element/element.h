@@ -5,7 +5,7 @@
 
 typedef struct _Elements Elements;
 typedef void (*fptrEleDraw)(Elements *);
-typedef void (*fptrEleUpdate)(Elements *);
+typedef void (*fptrEleUpdate)(Elements *, float delta_time);
 typedef void (*fptrEleInteract)(Elements *);
 typedef void (*fptrEleDestroy)(Elements *);
 struct _Elements

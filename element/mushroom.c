@@ -68,7 +68,7 @@ Elements *New_Mushroom(int label)
     return pObj;
 }
 
-void Mushroom_update(Elements *self)
+void Mushroom_update(Elements *self, float delta_time)
 {
     Mushroom *mush = ((Mushroom *)(self->pDerivedObj));
     /*// 目前無需更新，保持 active 狀態
@@ -160,7 +160,10 @@ void Mushroom_destroy(Elements *self)
 {
     Mushroom *mush = (Mushroom *)(self->pDerivedObj);
     al_destroy_bitmap(mush->img);
-    if (eat_sound) al_destroy_sample(eat_sound); // 僅銷毀一次
+    if (eat_sound) {
+        al_destroy_sample(eat_sound); // 僅銷毀一次
+        eat_sound = NULL;
+    } 
     free(mush->hitbox);
     free(mush);
     free(self);

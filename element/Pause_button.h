@@ -14,7 +14,7 @@ typedef struct _Pause_button
     Shape *hitbox; // the hitbox of object
 } Pause_button;
 Elements *New_Pause_button(int label);
-void Pause_button_update(Elements *self);
+void Pause_button_update(Elements *self,float delta_time);
 void Pause_button_interact(Elements *self);
 void Pause_button_draw(Elements *self);
 void Pause_button_destory(Elements *self);

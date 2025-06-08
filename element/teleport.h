@@ -13,7 +13,7 @@ typedef struct _Teleport
     bool activate; // If the teleport be activated
 } Teleport;
 Elements *New_Teleport(int label);
-void Teleport_update(Elements *self);
+void Teleport_update(Elements *self,float delta_time);
 void Teleport_interact(Elements *self);
 void Teleport_draw(Elements *self);
 void Teleport_destory(Elements *self);

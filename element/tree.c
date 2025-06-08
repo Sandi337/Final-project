@@ -25,7 +25,7 @@ Elements *New_Tree(int label)
     pObj->Destroy = Tree_destory;
     return pObj;
 }
-void Tree_update(Elements *self) {}
+void Tree_update(Elements *self, float delta_time) {}
 void Tree_interact(Elements *self) {}
 void Tree_draw(Elements *self)
 {

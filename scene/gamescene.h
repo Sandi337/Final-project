@@ -25,7 +25,7 @@ typedef struct _GameScene
 
 } GameScene;
 Scene *New_GameScene(int label);
-void game_scene_update(Scene *self);
+void game_scene_update(Scene *self, float delta_time);
 void game_scene_draw(Scene *self);
 void game_scene_destroy(Scene *self);
 

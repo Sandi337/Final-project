@@ -18,7 +18,7 @@ typedef struct _Mousesign
     ALLEGRO_BITMAP *hand_img;
 } Mousesign;
 Elements *New_Mousesign(int label);
-void Mousesign_update(Elements *self);
+void Mousesign_update(Elements *self,float delta_time);
 void Mousesign_interact(Elements *self);
 void Mousesign_draw(Elements *self);
 void Mousesign_destory(Elements *self);

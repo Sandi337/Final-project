@@ -14,20 +14,20 @@ void _Remove_elements(Scene *scene, Elements *ele)
             if (parent_ptr == NULL)
             {
                 scene->ele_list[ele->label] = ptr->next;
-                free(ptr);
-                break;
             }
             else
             {
-                parent_ptr->next = ptr->next;
-                free(ptr);
-                break;
+                parent_ptr->next = ptr->next;  
             }
+            free(ptr);
+            break;
         }
         parent_ptr = ptr;
         ptr = ptr->next;
     }
     scene->ele_num--;
+    if (ele->Destroy)
+        ele->Destroy(ele);
 }
 void _Register_elements(Scene *scene, Elements *ele)
 {

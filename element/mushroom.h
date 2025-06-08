@@ -9,7 +9,7 @@
 /*
    [MUSHROOM object]
 */
-#define MUSHROOM_L 5
+#define MUSHROOM_L 1
 
 typedef struct _Mushroom{
     ALLEGRO_BITMAP *img;
@@ -21,7 +21,7 @@ typedef struct _Mushroom{
 } Mushroom;
 
 Elements *New_Mushroom(int label);
-void Mushroom_update(Elements *self);
+void Mushroom_update(Elements *self, float delta_time);
 void Mushroom_interact(Elements *self);
 void _Mushroom_interact_Projectile(Elements *self, Elements *tar);
 void _Mushroom_interact_Character(Elements *self, Elements *tar);

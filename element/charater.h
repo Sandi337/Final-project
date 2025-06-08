@@ -31,7 +31,7 @@ typedef struct _Character
     Shape *hitbox; // the hitbox of object
 } Character;
 Elements *New_Character(int label);
-void Character_update(Elements *self);
+void Character_update(Elements *self, float delta_time);
 void Character_interact(Elements *self);
 void Character_draw(Elements *self);
 void Character_destory(Elements *self);
