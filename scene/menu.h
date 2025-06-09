@@ -16,7 +16,7 @@ typedef struct _Menu
     ALLEGRO_SAMPLE_INSTANCE *sample_instance;
     int title_x, title_y;
 } Menu;
-Scene *New_Menu(int label);
+Scene *New_Menu(int label, CharacterStatus *status);
 void menu_update(Scene *self, float delta_time);
 void menu_draw(Scene *self);
 void menu_destroy(Scene *self);

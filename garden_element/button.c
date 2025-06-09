@@ -100,13 +100,13 @@ void Button_update(Elements *self, float delta_time)
             chara->state = new_state;
             chara->state_changed = false;
         }
-        if (chara->state == BUT_UP &&key_state[ALLEGRO_KEY_UP])
+        if (chara->state == BUT_UP &&key_state[ALLEGRO_KEY_W])
             chara->state_changed = true;
-        else if (chara->state == BUT_DOWN&&key_state[ALLEGRO_KEY_DOWN])
+        else if (chara->state == BUT_DOWN&&key_state[ALLEGRO_KEY_S])
             chara->state_changed = true;
-        else if (chara->state == BUT_LEFT&&key_state[ALLEGRO_KEY_LEFT])
+        else if (chara->state == BUT_LEFT&&key_state[ALLEGRO_KEY_A])
             chara->state_changed = true;
-        else if (chara->state == BUT_RIGHT&&key_state[ALLEGRO_KEY_RIGHT])
+        else if (chara->state == BUT_RIGHT&&key_state[ALLEGRO_KEY_D])
             chara->state_changed = true;
     }
     if(legend){
@@ -147,7 +147,7 @@ void Button_draw(Elements *self)
     char time_text[32];
     sprintf(time_text, "Time: %.0f s", remain);
     al_draw_text(chara->font, al_map_rgb(255,255,0), 20, 70, 0, time_text);
-    if ((chara->state == BUT_UP &&key_state[ALLEGRO_KEY_UP])||(chara->state == BUT_DOWN&&key_state[ALLEGRO_KEY_DOWN])||(chara->state == BUT_LEFT&&key_state[ALLEGRO_KEY_LEFT])||(chara->state == BUT_RIGHT&&key_state[ALLEGRO_KEY_RIGHT]))
+    if ((chara->state == BUT_UP &&key_state[ALLEGRO_KEY_W])||(chara->state == BUT_DOWN&&key_state[ALLEGRO_KEY_S])||(chara->state == BUT_LEFT&&key_state[ALLEGRO_KEY_A])||(chara->state == BUT_RIGHT&&key_state[ALLEGRO_KEY_D]))
     {
         al_play_sample_instance(chara->dance_Sound);
     }

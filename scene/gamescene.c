@@ -21,13 +21,13 @@
 /*
    [GameScene function]
 */
-Scene *New_GameScene(int label)
+Scene *New_GameScene(int label, CharacterStatus *status)
 {
     printf("[DEBUG] Entering New_GameScene(label=%d)\n", label);
     fflush(stdout);
 
     GameScene *pDerivedObj = (GameScene *)malloc(sizeof(GameScene));
-    Scene *pObj = New_Scene(label);
+    Scene *pObj = New_Scene(label, status);
     // Load font
     pDerivedObj->font = al_load_font("assets/font/ByteBounce.ttf", 35, 0);
     if (!pDerivedObj->font) {
@@ -48,7 +48,7 @@ Scene *New_GameScene(int label)
     srand(time(NULL));
 
     // register element
-    _Register_elements(pObj, New_Character(Character_L));
+    _Register_elements(pObj, New_Character(Character_L, status));
     _Register_elements(pObj, New_Vine(Vine_L));
     _Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Mushroom(Mushroom_L));

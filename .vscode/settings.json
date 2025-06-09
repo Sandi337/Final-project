@@ -42,6 +42,7 @@
 		"mousesign.h": "c",
 		"garden_character.h": "c",
 		"algif.h": "c",
-		"gameoverscene.h": "c"
+		"gameoverscene.h": "c",
+		"character_status.h": "c"
 	}
 }

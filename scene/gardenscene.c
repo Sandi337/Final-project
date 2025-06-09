@@ -21,10 +21,10 @@ extern int window;
    [GardenScene function]
 */
 
-Scene* New_GardenScene(int label) {
+Scene* New_GardenScene(int label, CharacterStatus *status) {
     //printf("[DEBUG] Entered New_GardenScene with label = %d\n", label);
     GardenScene *pDerivedObj = (GardenScene *)malloc(sizeof(GardenScene));
-    Scene *pObj = New_Scene(label);
+    Scene *pObj = New_Scene(label, status);
     // setting derived object member
     pDerivedObj->background = al_load_bitmap("assets/image/MushroomForest2.jpg");
     if (!pDerivedObj->background) {
@@ -32,10 +32,10 @@ Scene* New_GardenScene(int label) {
         exit(1);
     }
     play_garden_bgm();
-
+    
     // register element
     printf("[DEBUG] Registering elements...\n");
-    _Register_elements(pObj, New_Character(Character_L));
+    _Register_elements(pObj, New_Character_Garden(Character_Garden_L, status));
     printf("[DEBUG] Character OK\n");
     _Register_elements(pObj, New_Mousesign(Mousesign_L));
     printf("[DEBUG] Mousesign OK\n");
@@ -56,6 +56,15 @@ Scene* New_GardenScene(int label) {
     _Register_elements(pObj, New_Legend(Legend_L));
     printf("[DEBUG]  New_Legend OK\n");
     
+    pDerivedObj->status = status;
+    pDerivedObj->health = status->HP;
+    pDerivedObj->energy = status->EN;
+    pDerivedObj->spirit = status->SP;
+    
+    status->SP += 20;
+    if (status->SP > 100)
+    status->SP = 100;
+
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Update = garden_scene_update;

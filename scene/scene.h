@@ -29,12 +29,13 @@ struct _Scene
     bool scene_end;
     int ele_num;
     EPNode *ele_list[MAX_ELEMENT];
+    CharacterStatus *status;
     // interface for function
     fptrUpdate Update;
     fptrDraw Draw;
     fptrDestroy Destroy;
 };
-Scene *New_Scene(int label);
+Scene *New_Scene(int label, CharacterStatus *status);
 void _Register_elements(Scene *scene, Elements *ele);
 void _Remove_elements(Scene *scene, Elements *ele);
 ElementVec _Get_all_elements(Scene *scene);

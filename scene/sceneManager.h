@@ -10,7 +10,8 @@ typedef enum SceneType
     GameScene_L = 1,
     GardenScene_L = 2,
     /*SeaScene_L = 3*/
-    GameOverScene_L = 4
+    GameOverScene_L = 4,
+    Restart_L = 5  
 } SceneType;
 void create_scene(SceneType);
 

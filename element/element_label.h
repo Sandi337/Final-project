@@ -15,6 +15,7 @@ typedef enum EleType {
     Projectile_L,
 
     // 花園場景專用
+    Character_Garden_L,
     Mousesign_L,
     Mushrooms_red_L,
     Mushrooms_blue_L,

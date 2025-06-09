@@ -9,6 +9,7 @@ int window = 0;
 ALLEGRO_EVENT_QUEUE *event_queue = NULL;
 ALLEGRO_EVENT event;
 ALLEGRO_TIMER *fps = NULL;
+CharacterStatus g_status = {100, 100, 100}; // 初始值
 bool key_state[ALLEGRO_KEY_MAX] = {false};
 bool mouse_state[ALLEGRO_MOUSE_MAX_EXTRA_AXES] = {false};
 Point mouse;

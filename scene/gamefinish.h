@@ -17,7 +17,7 @@ typedef struct _gamefinish
     int final_score;
     bool music_played;
 } gamefinish;
-Scene *New_gamefinish(int label);
+Scene *New_gamefinish(int label, CharacterStatus *status);
 void gamefinish_update(Scene *self, float delta_time);
 void gamefinish_draw(Scene *self);
 void gamefinish_destroy(Scene *self);

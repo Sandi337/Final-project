@@ -10,10 +10,10 @@
 /*
    [Menu function]
 */
-Scene *New_Menu(int label)
+Scene *New_Menu(int label, CharacterStatus *status)
 {
     Menu *pDerivedObj = (Menu *)malloc(sizeof(Menu));
-    Scene *pObj = New_Scene(label);
+    Scene *pObj = New_Scene(label, status);
     // setting derived object member
     pDerivedObj->font = al_load_ttf_font("assets/font/ByteBounce.ttf", 35, 0);
     pDerivedObj->titlefont = al_load_ttf_font("assets/font/ByteBounce.ttf", 350, 0);

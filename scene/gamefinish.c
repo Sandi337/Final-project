@@ -10,10 +10,10 @@
 */
 extern int final_score_global;
 
-Scene *New_gamefinish(int label)
+Scene *New_gamefinish(int label, CharacterStatus *status)
 {
     gamefinish *pDerivedObj = (gamefinish *)malloc(sizeof(gamefinish));
-    Scene *pObj = New_Scene(label);
+    Scene *pObj = New_Scene(label, status);
     // setting derived object member
     pDerivedObj->font = al_load_ttf_font("assets/font/pirulen.ttf", 36, 0);
     // Load sound

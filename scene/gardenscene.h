@@ -25,10 +25,14 @@ typedef struct _GardenScene
 {
     ALLEGRO_BITMAP *background;
     ALLEGRO_FONT *font;
+    CharacterStatus *status;
+    int health;
+    int energy;
+    int spirit;
     //int width, height;
 
 } GardenScene;
-Scene *New_GardenScene(int label);
+Scene *New_GardenScene(int label, CharacterStatus *status);
 void garden_scene_update(Scene *self, float delta_time);
 void garden_scene_draw(Scene *self);
 void garden_scene_destroy(Scene *self);

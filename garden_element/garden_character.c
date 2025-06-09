@@ -12,9 +12,9 @@
 /*
    [Character function]
 */
-Elements *New_Character_Garden(int label)
+Elements *New_Character_Garden(int label, CharacterStatus *status)
 {
-    Character *pDerivedObj = (Character *)malloc(sizeof(Character));
+    Character_Garden *pDerivedObj = (Character_Garden *)malloc(sizeof(Character_Garden));
     Elements *pObj = New_Elements(label);
     // setting derived object member
     // load character images
@@ -43,9 +43,14 @@ Elements *New_Character_Garden(int label)
                                         pDerivedObj->y + pDerivedObj->height);
     pDerivedObj->dir = false; // true: face to right, false: face to left
     // initial the animation component
-    pDerivedObj->state = STOP;
+    pDerivedObj->state = GARDEN_STOP ;
     pDerivedObj->new_proj = false;
     pObj->pDerivedObj = pDerivedObj;
+    pDerivedObj->status = status;
+    pDerivedObj->status = status;
+    pDerivedObj->health = status->HP;
+    pDerivedObj->energy = status->EN;
+    pDerivedObj->spirit = status->SP;
     // setting derived object function
     pObj->Draw = Character_Garden_draw;
     pObj->Update = Character_Garden_update;
@@ -53,36 +58,38 @@ Elements *New_Character_Garden(int label)
     pObj->Destroy = Character_Garden_destroy;
     return pObj;
 }
-void Character_Garden_update(Elements *self)
+void Character_Garden_update(Elements *self, float delta_time)
 {
+    (void)delta_time;
     // use the idea of finite state machine to deal with different state
-    Character *chara = ((Character *)(self->pDerivedObj));
-    if (key_state[ALLEGRO_KEY_UP])
+    Character_Garden *chara = ((Character_Garden *)(self->pDerivedObj));
+    printf("[DEBUG] state=%d\n", chara->state);
+    if (key_state[ALLEGRO_KEY_W])
         {
             chara->state = UP;
         }
-    else if (key_state[ALLEGRO_KEY_DOWN])
+    else if (key_state[ALLEGRO_KEY_S])
         {
             chara->state = DOWN;
         }
-    else if (key_state[ALLEGRO_KEY_LEFT])
+    else if (key_state[ALLEGRO_KEY_A])
         {
             chara->state = LEFT;
         }
-    else if (key_state[ALLEGRO_KEY_RIGHT])
+    else if (key_state[ALLEGRO_KEY_D])
         {
             chara->state = RIGHT;
         }
     else
         {
-            chara->state = STOP;
+            chara->state = GARDEN_STOP ;
         }
     
 }
 void Character_Garden_draw(Elements *self)
 {
     // with the state, draw corresponding image
-    Character *chara = ((Character *)(self->pDerivedObj));
+    Character_Garden *chara = ((Character_Garden *)(self->pDerivedObj));
     ALLEGRO_BITMAP *frame = algif_get_bitmap(chara->gif_status[chara->state], al_get_time());
     if (frame)
     {
@@ -91,7 +98,7 @@ void Character_Garden_draw(Elements *self)
 }
 void Character_Garden_destroy(Elements *self)
 {
-    Character *Obj = ((Character *)(self->pDerivedObj));
+    Character_Garden *Obj = ((Character_Garden *)(self->pDerivedObj));
     for (int i = 0; i < 5; i++)
         algif_destroy_animation(Obj->gif_status[i]);
     free(Obj->hitbox);
@@ -101,7 +108,7 @@ void Character_Garden_destroy(Elements *self)
 
 void _Character_Garden_update_position(Elements *self, int dx, int dy)
 {
-    Character *chara = ((Character *)(self->pDerivedObj));
+    Character_Garden *chara = ((Character_Garden *)(self->pDerivedObj));
     chara->x += dx;
     chara->y += dy;
     Shape *hitbox = chara->hitbox;

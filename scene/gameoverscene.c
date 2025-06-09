@@ -1,24 +1,23 @@
 #include "gameoverscene.h"
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
+#include <allegro5/allegro_font.h>
+#include <allegro5/allegro_ttf.h>
 #include "../global.h"
 #include "gamescene.h"
 #include "../scene/sceneManager.h"
 
-typedef struct _GameOverScene {
-    ALLEGRO_BITMAP *image;
-} GameOverScene;
-
-Scene* New_GameOverScene(int label) {
-    Scene *pObj = New_Scene(label);
+Scene* New_GameOverScene(int label, CharacterStatus *status) {
+    Scene *pObj = New_Scene(label, status);
     GameOverScene *data = (GameOverScene*)malloc(sizeof(GameOverScene));
+    
     data->image = al_load_bitmap("assets/image/gameover.png");
+    data->font = al_load_ttf_font("assets/font/ByteBounce.ttf", 35, 0);
 
-    if (!data->image) {
-        fprintf(stderr, "[ERROR] Failed to load gameover.png!\n");
-        exit(1);
+    if (!data->font) {
+    fprintf(stderr, "[ERROR] Failed to load font: assets/font/ByteBounce.ttf\n");
+    exit(1);
     }
-
     pObj->pDerivedObj = data;
     pObj->Update = gameover_scene_update;
     pObj->Draw = gameover_scene_draw;
@@ -29,7 +28,13 @@ Scene* New_GameOverScene(int label) {
 
 void gameover_scene_update(Scene *self, float delta_time) {
     (void)delta_time;
+
+    CharacterStatus *status = self->status; 
+    
     if (key_state[ALLEGRO_KEY_ENTER]) {
+        status->HP = 100;
+        status->EN = 100;
+        status->SP = 100; // 或你想要的起始值
         self->scene_end = true;
         window = Menu_L;
     }
@@ -45,6 +50,14 @@ void gameover_scene_draw(Scene *self) {
                           0, 0,
                           WIDTH, HEIGHT,
                           0);
+    if (data->font) {
+        al_draw_text(data->font, al_map_rgb(255, 255, 255), WIDTH / 2, HEIGHT - 100,
+                 ALLEGRO_ALIGN_CENTER, "Press ENTER to restart");
+    } else {
+        al_draw_text(al_create_builtin_font(), al_map_rgb(255, 0, 0), WIDTH / 2, HEIGHT - 100,
+                 ALLEGRO_ALIGN_CENTER, "Font Missing!");
+    }
+
 }
 
 void gameover_scene_destroy(Scene *self) {

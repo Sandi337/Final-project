@@ -90,11 +90,12 @@ ElementVec _Get_label_elements(Scene *scene, int label)
     res.len = size;
     return res;
 }
-Scene *New_Scene(int label)
+Scene *New_Scene(int label, CharacterStatus *status)
 {
     Scene *pObj;
     pObj = (Scene *)malloc(sizeof(Scene));
     // setting object member
+    pObj->status = status;
     pObj->label = label;
     pObj->scene_end = false;
     pObj->ele_num = 0;

@@ -15,6 +15,7 @@ typedef struct _GameScene
     ALLEGRO_FONT *font;
     ALLEGRO_SAMPLE *song;
     ALLEGRO_SAMPLE_INSTANCE *sample_instance;
+    CharacterStatus *status;
     float bg_offset_x;          // 背景水平偏移量
     float scroll_speed;         // 滾動速度
     int width, height;
@@ -25,8 +26,8 @@ typedef struct _GameScene
     
 
 } GameScene;
-Scene *New_GameScene(int label);
-Scene *New_GardenScene(int label);
+Scene *New_GameScene(int label, CharacterStatus *status);
+Scene *New_GardenScene(int label, CharacterStatus *status);
 void game_scene_update(Scene *self, float delta_time);
 void game_scene_draw(Scene *self);
 void game_scene_destroy(Scene *self);

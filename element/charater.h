@@ -29,17 +29,19 @@ typedef struct _Character
     ALLEGRO_SAMPLE_INSTANCE *atk_Sound;
     int anime;      // counting the time of animation
     int anime_time; // indicate how long the animation
+    CharacterStatus *status;
     int health;
     int energy;
     int spirit;
     bool new_proj;
     Shape *hitbox; // the hitbox of object
 } Character;
-Elements *New_Character(int label);
+Elements *New_Character(int label, CharacterStatus *status);
 void Character_update(Elements *self, float delta_time);
 void Character_interact(Elements *self);
 void Character_draw(Elements *self);
 void Character_destory(Elements *self);
 void _Character_update_position(Elements *self, int dx, int dy);
+void SyncCharacterToStatus(Character *chara);
 
 #endif
