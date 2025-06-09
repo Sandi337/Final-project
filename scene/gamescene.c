@@ -3,6 +3,7 @@
 #include <allegro5/allegro_font.h>
 
 #include "gamescene.h"
+#include "../scene/sceneManager.h"
 #include "../global.h"
 #include "../element/charater.h"
 #include "../element/hud.h"
@@ -11,6 +12,7 @@
 #include "../element/vine.h"
 #include "../element/tree.h"
 #include "../element/projectile.h"
+#include "../element/gardendoor.h"
 /*#include "../element/Continue.h"
 #include "../element/Legend.h"*/
 
@@ -28,30 +30,19 @@ Scene *New_GameScene(int label)
     Scene *pObj = New_Scene(label);
     // Load font
     pDerivedObj->font = al_load_font("assets/font/ByteBounce.ttf", 35, 0);
-    // Load sound
-    pDerivedObj->song = al_load_sample("assets/sound/main_music.mp3");
-    pDerivedObj->sample_instance = al_create_sample_instance(pDerivedObj->song);
-    // Loop the song until the display closes
-    al_set_sample_instance_playmode(pDerivedObj->sample_instance, ALLEGRO_PLAYMODE_LOOP);
-    al_attach_sample_instance_to_mixer(pDerivedObj->sample_instance, al_get_default_mixer());
-    // Start playing the sound
-    al_play_sample_instance(pDerivedObj->sample_instance);
-    // set the volume of instance
-    al_set_sample_instance_gain(pDerivedObj->sample_instance, 0.5);
+    if (!pDerivedObj->font) {
+    fprintf(stderr, "[ERROR] Failed to load font!\n");
+    exit(1);
+    }
+    
+    play_bgm();
+    
     // setting derived object member
     pDerivedObj->background = al_load_bitmap("assets/image/main_scene.png");
     if (!pDerivedObj->background) {
         fprintf(stderr, "Failed to load background: assets/image/main_scene.png\n");
         exit(1);
     }
-    // Initialize scroll variables
-    pDerivedObj->bg_offset_x = 0.0;
-    pDerivedObj->scroll_speed = 1.0; // 根據需求調整
-    pDerivedObj->start_time = al_get_time();
-    pDerivedObj->energy_timer = 0.0;
-    //pDerivedObj->garden_portal_spawned = false;
-    //pDerivedObj->garden_portal_timer = 0.0;
-    pObj->pDerivedObj = pDerivedObj;
 
     // 初始化隨機數生成器
     srand(time(NULL));
@@ -61,6 +52,7 @@ Scene *New_GameScene(int label)
     _Register_elements(pObj, New_Vine(Vine_L));
     _Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Mushroom(Mushroom_L));
+    //_Register_elements(pObj, New_Gardendoor(Gardendoor_L)); 
     //_Register_elements(pObj, New_Pause_button(Pause_button_L));
     
     /*_Register_elements(pObj, New_Continue(Continue_L));
@@ -98,6 +90,14 @@ Scene *New_GameScene(int label)
             Mushroom_destroy(new_mush);
         }
     }
+    // Initialize scroll variables
+    pDerivedObj->bg_offset_x = 0.0;
+    pDerivedObj->scroll_speed = 1.0; // 根據需求調整
+    pDerivedObj->start_time = al_get_time();
+    pDerivedObj->energy_timer = 0.0;
+    pDerivedObj->garden_portal_spawned = false;
+    pDerivedObj->garden_portal_timer = 0.0;
+    pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Update = game_scene_update;
     pObj->Draw = game_scene_draw;
@@ -118,7 +118,7 @@ void game_scene_update(Scene *self, float delta_time)
     for (int i = 0; i < allEle.len; i++) {
         if (allEle.arr[i]->label == Character_L) {
             chara = (Character *)allEle.arr[i]->pDerivedObj;
-            printf("[DEBUG] Found Character at index %d, spirit = %d\n", i, chara->spirit); // 調試輸出
+            //printf("[DEBUG] Found Character at index %d, spirit = %d\n", i, chara->spirit); // 調試輸出
             break;
         }
     }
@@ -126,7 +126,10 @@ void game_scene_update(Scene *self, float delta_time)
         printf("[ERROR] Character not found in allEle!\n");
         return; // 若未找到，退出更新
     }
-
+    if (chara->health <= 0) {
+        window = GameOverScene_L;
+        self->scene_end = true;
+    }
     // 能量每 5 秒扣 5 點
     //delta_time =  1.0 / 60 ;//每秒更新 60 次
     gs->energy_timer += delta_time;
@@ -162,6 +165,10 @@ void game_scene_update(Scene *self, float delta_time)
             else if (ele->label == Vine_L) {
                 Vine *tp = (Vine *)ele->pDerivedObj;
                 tp->x -= gs->scroll_speed;
+            }
+            else if (ele->label == Gardendoor_L) {
+                Gardendoor *gd = (Gardendoor *)ele->pDerivedObj;
+                gd->x -= gs->scroll_speed;
             }
         }
         
@@ -201,9 +208,9 @@ void game_scene_update(Scene *self, float delta_time)
         gs->bg_offset_x = fmod(gs->bg_offset_x, bg_width);
         if (gs->bg_offset_x < 0) gs->bg_offset_x += bg_width;
     }
-
+    bool mouse_clicked = mouse_state[1]; 
     // 檢查鼠標點擊並處理蘑菇
-    if (mouse_state[1]) { // 左鍵點擊
+    if (mouse_clicked) { // 左鍵點擊
         printf("Mouse clicked at (%.0f, %.0f)\n", mouse.x, mouse.y);  // 確認點擊位置
         for (int i = 0; i < allEle.len; i++) {
             Elements *ele = allEle.arr[i];
@@ -231,8 +238,24 @@ void game_scene_update(Scene *self, float delta_time)
                 }
             }
         }
-        // 重置鼠標狀態，避免重複觸發
-        mouse_state[1] = false;
+        
+    }
+    // 每 5 秒檢查一次精神值是否 < 75，如果是，生成花園入口
+    if (chara && chara->spirit < 75) {
+        gs->garden_portal_timer += delta_time;
+        if (!gs->garden_portal_spawned && gs->garden_portal_timer >= 5.0f) {
+            printf("[GARDEN] Spirit < 75 -> Randomly spawning garden portal...\n");
+
+            Elements *portal = New_Gardendoor(Gardendoor_L);
+            Gardendoor *door = (Gardendoor *)(portal->pDerivedObj);
+            door->active = true; 
+
+            _Register_elements(self, portal);
+
+            gs->garden_portal_spawned = true;
+        }
+    } else if (chara && chara->spirit >= 75) {
+        gs->garden_portal_timer = 0.0;
     }
     
     // 更新所有元素
@@ -249,6 +272,12 @@ void game_scene_update(Scene *self, float delta_time)
                 ele->dele = true;
             }
         }
+        else if(ele->label == Gardendoor_L){
+            Gardendoor *door = (Gardendoor *)ele->pDerivedObj;
+            if (!door->active) { 
+                gs->garden_portal_spawned = false;
+            }
+        }
     }
     
     // run interact for every element
@@ -257,6 +286,8 @@ void game_scene_update(Scene *self, float delta_time)
         Elements *ele = allEle.arr[i];
         ele->Interact(ele);
     }
+    // 重置鼠標狀態，避免重複觸發
+    mouse_state[1] = false;
     // remove element
     for (int i = 0; i < allEle.len; i++)
     {
@@ -296,7 +327,8 @@ void game_scene_draw(Scene *self)
         if (
             allEle.arr[i]->label == Mushroom_L || 
             allEle.arr[i]->label == Tree_L || 
-            allEle.arr[i]->label == Vine_L 
+            allEle.arr[i]->label == Vine_L ||
+            allEle.arr[i]->label == Gardendoor_L
         )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }
@@ -316,7 +348,8 @@ void game_scene_draw(Scene *self)
         if (label != Character_L &&
              label != Mushroom_L && 
              label != Tree_L && 
-             allEle.arr[i]->label != Vine_L 
+             allEle.arr[i]->label != Vine_L &&
+             allEle.arr[i]->label != Gardendoor_L
             )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }
@@ -345,8 +378,8 @@ void game_scene_destroy(Scene *self)
     GameScene *Obj = ((GameScene *)(self->pDerivedObj));
     ALLEGRO_BITMAP *background = Obj->background;
     al_destroy_bitmap(background);
-    al_destroy_sample(Obj->song);
-    al_destroy_sample_instance(Obj->sample_instance);
+    //al_destroy_sample(Obj->song);
+    //al_destroy_sample_instance(Obj->sample_instance);
     ElementVec allEle = _Get_all_elements(self);
     for (int i = 0; i < allEle.len; i++)
     {

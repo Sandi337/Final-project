@@ -2,9 +2,11 @@
 #define GARDENSCENE_H
 
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_font.h>
 #include "../scene/scene.h"
 #include "../element/charater.h"
 #include "../element/element_label.h"
+
 
 /*Scene* New_GardenScene(int label);*/
 
@@ -22,9 +24,8 @@
 typedef struct _GardenScene
 {
     ALLEGRO_BITMAP *background;
-    ALLEGRO_SAMPLE *song;
-    ALLEGRO_SAMPLE_INSTANCE *sample_instance;
-    int width, height;
+    ALLEGRO_FONT *font;
+    //int width, height;
 
 } GardenScene;
 Scene *New_GardenScene(int label);

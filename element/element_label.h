@@ -11,7 +11,7 @@ typedef enum EleType {
     Mushroom_L,
     Vine_L,
     Tree_L,
-    
+    Gardendoor_L,
     Projectile_L,
 
     // 花園場景專用

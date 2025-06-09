@@ -38,6 +38,10 @@
 		"game_assert.h": "c",
 		"global.h": "c",
 		"mushrooms_blue.h": "c",
-		"audio.h": "c"
+		"audio.h": "c",
+		"mousesign.h": "c",
+		"garden_character.h": "c",
+		"algif.h": "c",
+		"gameoverscene.h": "c"
 	}
 }

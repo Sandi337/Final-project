@@ -4,7 +4,9 @@
 #include <stdio.h>
 
 static ALLEGRO_SAMPLE *bgm = NULL;
+static ALLEGRO_SAMPLE *garden_bgm = NULL;
 static ALLEGRO_SAMPLE_INSTANCE *bgm_instance = NULL;
+static ALLEGRO_SAMPLE_INSTANCE *garden_bgm_instance = NULL;
 static ALLEGRO_SAMPLE *dig_sound = NULL;
 static ALLEGRO_SAMPLE *eat_sound = NULL;
 static ALLEGRO_SAMPLE *hurt_sound = NULL;
@@ -17,6 +19,14 @@ void AudioManager_Init() {
     bgm_instance = al_create_sample_instance(bgm);
     al_set_sample_instance_playmode(bgm_instance, ALLEGRO_PLAYMODE_LOOP);
     al_attach_sample_instance_to_mixer(bgm_instance, al_get_default_mixer());
+
+    garden_bgm = al_load_sample("assets/sound/Garden_dance.mp3");
+    if (!garden_bgm) {
+        fprintf(stderr, "Failed to load garden_bgm.\n");
+    }
+    garden_bgm_instance = al_create_sample_instance(garden_bgm);
+    al_set_sample_instance_playmode(garden_bgm_instance, ALLEGRO_PLAYMODE_LOOP);
+    al_attach_sample_instance_to_mixer(garden_bgm_instance, al_get_default_mixer());
     
     dig_sound = al_load_sample("assets/sound/Shovelsound.mp3");
     if (!dig_sound) {
@@ -50,16 +60,41 @@ void play_dig_sound(void) {
 void AudioManager_Destroy() {
     if (bgm_instance) al_destroy_sample_instance(bgm_instance);
     if (bgm) al_destroy_sample(bgm);
+
+    if (garden_bgm_instance) al_destroy_sample_instance(garden_bgm_instance); 
+    if (garden_bgm) al_destroy_sample(garden_bgm);
+
     if (dig_sound) al_destroy_sample(dig_sound);
     if (eat_sound) al_destroy_sample(eat_sound);
 }
 
 void play_bgm() {
+    if (garden_bgm_instance) al_stop_sample_instance(garden_bgm_instance);  
     if (bgm_instance) al_play_sample_instance(bgm_instance);
+}
+
+void play_garden_bgm() {
+    if (bgm_instance) al_stop_sample_instance(bgm_instance);  // 停止主場音樂
+
+    if (!garden_bgm)
+        garden_bgm = al_load_sample("assets/sound/garden_music.mp3");
+    
+    if (!garden_bgm_instance) {
+        garden_bgm_instance = al_create_sample_instance(garden_bgm);
+        al_set_sample_instance_playmode(garden_bgm_instance, ALLEGRO_PLAYMODE_LOOP);
+        al_attach_sample_instance_to_mixer(garden_bgm_instance, al_get_default_mixer());
+    }
+
+    al_play_sample_instance(garden_bgm_instance);
 }
 
 void stop_bgm() {
     if (bgm_instance) al_stop_sample_instance(bgm_instance);
+}
+
+void stop_garden_bgm() {
+    if (garden_bgm_instance)
+        al_stop_sample_instance(garden_bgm_instance);
 }
 
 

@@ -20,12 +20,13 @@ typedef struct _GameScene
     int width, height;
     double start_time;          //倒計時器
     float energy_timer;         // 每 3 秒扣能量
-    //bool garden_portal_spawned; //入口是否生成過
-    //double garden_portal_timer;
+    bool garden_portal_spawned; //入口是否生成過
+    double garden_portal_timer;
     
 
 } GameScene;
 Scene *New_GameScene(int label);
+Scene *New_GardenScene(int label);
 void game_scene_update(Scene *self, float delta_time);
 void game_scene_draw(Scene *self);
 void game_scene_destroy(Scene *self);

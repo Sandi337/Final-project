@@ -15,8 +15,8 @@ Elements *New_Mousesign(int label)
     pDerivedObj->x = mouse.x;
     pDerivedObj->y = mouse.y;
     pDerivedObj->r = 10;
-    pDerivedObj->arrow_img = al_load_bitmap("assets/image/arrow.png");
-    pDerivedObj->hand_img = al_load_bitmap("assets/image/hand.png");
+    pDerivedObj->arrow_img = al_load_bitmap("assets/image/arrow1.png");
+    pDerivedObj->hand_img = al_load_bitmap("assets/image/catch.png");
     pDerivedObj->img = pDerivedObj->arrow_img;
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
     pDerivedObj->height = al_get_bitmap_height(pDerivedObj->img);

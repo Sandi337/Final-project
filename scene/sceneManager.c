@@ -2,6 +2,7 @@
 #include "menu.h"
 #include "gamescene.h"
 #include "gardenscene.h"
+#include "gameoverscene.h"
 #include "../global.h"
 
 Scene *scene = NULL;
@@ -24,10 +25,13 @@ void create_scene(SceneType type)
         scene = New_GardenScene(GardenScene_L); 
         printf("[DEBUG]  -> New_GardenScene returned %p\n", (void*)scene);
         break;
-    case SeaScene_L: 
-        scene = New_GardenScene(SeaScene_L); 
+    /*case SeaScene_L: 
+        scene = New_SeaScene(SeaScene_L); 
         printf("[DEBUG]  -> New_SeaScene returned %p\n", (void*)scene);
-        break;
+        break;*/
+    case GameOverScene_L:
+        scene = New_GameOverScene(GameOverScene_L);
+    break;
     default:
         printf("[DEBUG]  -> unknown type!\n");
         break;

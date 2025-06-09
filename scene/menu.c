@@ -21,6 +21,7 @@ Scene *New_Menu(int label)
     // Load sound
     pDerivedObj->song = al_load_sample("assets/sound/menu.mp3");
     pDerivedObj->background = al_load_bitmap("assets/image/enter_scene.png");
+
     al_reserve_samples(20);
     pDerivedObj->sample_instance = al_create_sample_instance(pDerivedObj->song);
     pDerivedObj->title_x = WIDTH / 2;

@@ -14,6 +14,7 @@
 #include "scene/sceneManager.h"
 #include "element/projectile.h"
 #include <stdbool.h>
+#include "audio/audio.h"
 
 Game *New_Game()
 {
@@ -97,6 +98,8 @@ void game_init(Game *self)
     addon_init &= al_install_keyboard();  // install keyboard event
     addon_init &= al_install_mouse();     // install mouse event
     addon_init &= al_install_audio();     // install audio event
+    al_reserve_samples(8);                 
+    AudioManager_Init(); 
     GAME_ASSERT(addon_init, "failed to initialize allegro addons.");
     // Create display
     self->display = al_create_display(WIDTH, HEIGHT);
@@ -120,7 +123,7 @@ void game_init(Game *self)
     // initialize the icon on the display
     ALLEGRO_BITMAP *icon = al_load_bitmap("assets/image/ichigo_stand.png");
     al_set_display_icon(self->display, icon);
-
+    
     /*self->custom_cursor = NULL; // 預設無自定義鼠標*/
     //載入自定義鼠標
     ALLEGRO_BITMAP *cursor_bitmap = al_load_bitmap("assets/image/cursor.png");
@@ -172,8 +175,14 @@ bool game_update(Game *self, float delta_time)
         case GardenScene_L: 
             create_scene(GardenScene_L); 
             break;
-        case SeaScene_L: 
+        /*case SeaScene_L: 
             create_scene(SeaScene_L); 
+            break;*/
+        case GameOverScene_L:
+            create_scene(GameOverScene_L);
+            if (!scene) {
+                printf("scene is NULL after switching!\n");
+            }
             break;
         case -1:
             return false;
@@ -199,6 +208,7 @@ void game_destroy(Game *self)
     // Make sure you destroy all things
     al_destroy_event_queue(event_queue);
     al_destroy_display(self->display);
+    AudioManager_Destroy();
     scene->Destroy(scene);
     Projectile_release_sound();
     al_destroy_mouse_cursor(self->custom_cursor); // 釋放自定義鼠標
