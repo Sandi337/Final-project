@@ -2,7 +2,6 @@
 #include "Pause_button.h"
 #include "../element/charater.h"
 #include "../shapes/Circle.h"
-#include "../scene/gamescene.h" // for element label
 #include "../scene/sceneManager.h" // for scene variable
 #include <allegro5/allegro_primitives.h>
 /*

@@ -3,7 +3,8 @@
 #include <allegro5/allegro_audio.h>
 #include<allegro5/allegro_font.h>
 #include<allegro5/allegro_ttf.h>
-#include "../element/element.h"
+#include "../element/element.h"  
+#include "../element/element_label.h"
 #include "../shapes/Shape.h"
 #include "../algif5/algif.h"
 #include <stdbool.h>

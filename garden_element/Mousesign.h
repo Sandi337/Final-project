@@ -1,7 +1,7 @@
 #ifndef Mousesign_H_INCLUDED
 #define Mousesign_H_INCLUDED
-#include "../element/element.h"
-#include "../scene/gamescene.h" // for element label
+#include "../element/element.h" 
+#include "../element/element_label.h"
 #include "../shapes/Shape.h"
 #include <allegro5/allegro_color.h>
 /*

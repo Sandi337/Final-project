@@ -1,5 +1,6 @@
 #include "Continue.h"
 #include "../shapes/Rectangle.h"
+#include "../element/element_label.h"
 #include "../global.h" 
 #include "../GameWindow.h" 
 /*
@@ -8,7 +9,7 @@
 Elements *New_Continue(int label)
 {
     Continue *pDerivedObj = (Continue *)malloc(sizeof(Continue));
-    Elements *pObj = New_Elements(label);
+    Elements *pObj = New_Elements(Continue_L);
     // setting derived object member
     pDerivedObj->img = al_load_bitmap("assets/image/continue.png");
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);

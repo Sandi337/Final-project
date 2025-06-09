@@ -1,7 +1,7 @@
 #ifndef Mushrooms_red_H_INCLUDED
 #define Mushrooms_red_H_INCLUDED
-#include "../element/element.h"
-#include "../scene/gamescene.h" // for element label
+#include "../element/element.h" 
+#include "../element/element_label.h"
 #include "../shapes/Shape.h"
 /*
    [Mushrooms_red object]

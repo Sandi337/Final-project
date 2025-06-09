@@ -1,7 +1,7 @@
 #ifndef Pause_button_H_INCLUDED
 #define Pause_button_H_INCLUDED
-#include "../element/element.h"
-#include "../scene/gamescene.h" // for element label
+#include "../element/element.h" 
+#include "../element/element_label.h"
 #include "../shapes/Shape.h"
 /*
    [Pause_button object]

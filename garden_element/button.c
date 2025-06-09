@@ -3,11 +3,12 @@
 #include <allegro5/allegro_image.h>
 #include<allegro5/allegro_font.h>
 #include<allegro5/allegro_ttf.h>
+#include "../element/element_label.h"
 #include "button.h"
 #include "../scene/sceneManager.h"
 #include "../shapes/Rectangle.h"
 #include "../algif5/algif.h"
-#include "../scene/gamescene.h"
+#include "../scene/gardenscene.h"
 #include "../scene/gamefinish.h"
 #include <stdio.h>
 #include<stdlib.h>
@@ -24,7 +25,7 @@ Elements *New_Button(int label)
     al_init_font_addon();
     al_init_ttf_addon();
     Button *pDerivedObj = (Button *)malloc(sizeof(Button));
-    Elements *pObj = New_Elements(label);
+    Elements *pObj = New_Elements(Button_L);
     // setting derived object member
     // load Button images
     char state_string[4][10] = {"up", "down", "left", "right"};

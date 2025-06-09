@@ -56,7 +56,7 @@ Elements *New_Mushroom(int label)
     }
     if (!pDerivedObj->img) {
         fprintf(stderr, "Failed to load mushroom image!\n");
-        exit(1);
+        return NULL;
     }
 
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);

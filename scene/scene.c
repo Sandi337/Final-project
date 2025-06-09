@@ -1,8 +1,10 @@
 #include "scene.h"
 #include <stdbool.h>
+#include "sceneManager.h"
 /*
    [Scene function]
 */
+extern Scene *scene;
 void _Remove_elements(Scene *scene, Elements *ele)
 {
     EPNode *ptr = scene->ele_list[ele->label];

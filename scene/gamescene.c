@@ -3,14 +3,13 @@
 #include <allegro5/allegro_font.h>
 
 #include "gamescene.h"
-
+#include "../global.h"
 #include "../element/charater.h"
 #include "../element/hud.h"
-#include "../element/element.h"
+#include "../element/element_label.h"
 #include "../element/mushroom.h"
 #include "../element/vine.h"
 #include "../element/tree.h"
-#include "../element/gardendoor.h"
 #include "../element/projectile.h"
 /*#include "../element/Continue.h"
 #include "../element/Legend.h"*/
@@ -22,6 +21,9 @@
 */
 Scene *New_GameScene(int label)
 {
+    printf("[DEBUG] Entering New_GameScene(label=%d)\n", label);
+    fflush(stdout);
+
     GameScene *pDerivedObj = (GameScene *)malloc(sizeof(GameScene));
     Scene *pObj = New_Scene(label);
     // Load font
@@ -47,8 +49,8 @@ Scene *New_GameScene(int label)
     pDerivedObj->scroll_speed = 1.0; // 根據需求調整
     pDerivedObj->start_time = al_get_time();
     pDerivedObj->energy_timer = 0.0;
-    pDerivedObj->garden_portal_spawned = false;
-    pDerivedObj->garden_portal_timer = 0.0;
+    //pDerivedObj->garden_portal_spawned = false;
+    //pDerivedObj->garden_portal_timer = 0.0;
     pObj->pDerivedObj = pDerivedObj;
 
     // 初始化隨機數生成器
@@ -60,7 +62,7 @@ Scene *New_GameScene(int label)
     _Register_elements(pObj, New_Tree(Tree_L));
     _Register_elements(pObj, New_Mushroom(Mushroom_L));
     //_Register_elements(pObj, New_Pause_button(Pause_button_L));
-    _Register_elements(pObj, New_Gardendoor(Gardendoor_L));
+    
     /*_Register_elements(pObj, New_Continue(Continue_L));
     _Register_elements(pObj, New_Legend(Legend_L));*/
 
@@ -105,6 +107,8 @@ Scene *New_GameScene(int label)
 
 void game_scene_update(Scene *self, float delta_time)
 {
+    /*printf("[DEBUG] in game_scene_update, dt=%.3f\n", delta_time);
+    if (delta_time > 1.0f || delta_time <= 0.0f) delta_time = 1.0f / FPS; // 限制 delta_time*/
     // update every element
     ElementVec allEle = _Get_all_elements(self);
     GameScene *gs = ((GameScene *)(self->pDerivedObj));
@@ -114,9 +118,15 @@ void game_scene_update(Scene *self, float delta_time)
     for (int i = 0; i < allEle.len; i++) {
         if (allEle.arr[i]->label == Character_L) {
             chara = (Character *)allEle.arr[i]->pDerivedObj;
+            printf("[DEBUG] Found Character at index %d, spirit = %d\n", i, chara->spirit); // 調試輸出
             break;
         }
     }
+    if (!chara) {
+        printf("[ERROR] Character not found in allEle!\n");
+        return; // 若未找到，退出更新
+    }
+
     // 能量每 5 秒扣 5 點
     //delta_time =  1.0 / 60 ;//每秒更新 60 次
     gs->energy_timer += delta_time;
@@ -155,7 +165,7 @@ void game_scene_update(Scene *self, float delta_time)
             }
         }
         
-            // 背景移動時，讓新蘑菇在右邊生成
+        // 背景移動時，讓新蘑菇在右邊生成
         if ((int)gs->bg_offset_x % 500 == 0) {
             int mush_count = 1 + rand() % 3;
             int placed = 0;
@@ -224,22 +234,6 @@ void game_scene_update(Scene *self, float delta_time)
         // 重置鼠標狀態，避免重複觸發
         mouse_state[1] = false;
     }
-    // 每 5 秒檢查一次精神值是否 < 75，如果是，生成花園入口
-    if (chara && chara->spirit < 75) {
-        gs->garden_portal_timer += delta_time;
-        if (gs->garden_portal_timer >= 5.0) {
-            printf("[GARDEN] Spirit < 75 -> Randomly spawning garden portal...\n");
-            Elements *portal = New_Gardendoor(Gardendoor_L);
-            Gardendoor *door = (Gardendoor *)(portal->pDerivedObj);
-            door->x = rand() % (WIDTH - door->width);
-            door->y = HEIGHT - door->height - 10;
-            _Register_elements(self, portal);
-
-            gs->garden_portal_timer = 0.0;
-        }
-    } else {
-        gs->garden_portal_timer = 0.0; // 如果精神值回到 >=75，重置計時器
-    }
     
     // 更新所有元素
     for (int i = 0; i < allEle.len; i++) {
@@ -302,8 +296,7 @@ void game_scene_draw(Scene *self)
         if (
             allEle.arr[i]->label == Mushroom_L || 
             allEle.arr[i]->label == Tree_L || 
-            allEle.arr[i]->label == Vine_L || 
-            allEle.arr[i]->label == Gardendoor_L 
+            allEle.arr[i]->label == Vine_L 
         )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }
@@ -323,8 +316,7 @@ void game_scene_draw(Scene *self)
         if (label != Character_L &&
              label != Mushroom_L && 
              label != Tree_L && 
-             allEle.arr[i]->label != Vine_L &&
-             allEle.arr[i]->label != Gardendoor_L
+             allEle.arr[i]->label != Vine_L 
             )
             allEle.arr[i]->Draw(allEle.arr[i]);
     }

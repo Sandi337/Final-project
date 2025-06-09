@@ -138,29 +138,52 @@ void game_init(Game *self)
 }
 bool game_update(Game *self, float delta_time)
 {
+    /*printf("[DEBUG] game_update begin, scene=%p, scene->Update=%p, scene_end=%d, window=%d\n",
+           (void*)scene,
+           scene ? (void*)scene->Update : NULL,
+           scene ? scene->scene_end : -1,
+           window);*/
+    if (!scene) {
+        printf("[ERROR] scene is NULL, cannot update\n");
+        return false;
+    }
+    if (!scene->Update) {
+        printf("[ERROR] scene->Update is NULL, cannot call Update\n");
+        return false;
+    }
+
     scene->Update(scene, delta_time);
+
     if (scene->scene_end)
     {
+        printf("[DEBUG] scene_end true, destroying old scene and creating new one\n");
         scene->Destroy(scene);
         switch (window)
         {
-        case 0:
+        case Menu_L:
             create_scene(Menu_L);
             break;
-        case 1:
+        case GameScene_L:
             create_scene(GameScene_L);
+            if (!scene) {
+                printf("scene is NULL after switching!\n");
+            }
             break;
-        case 2: 
+        case GardenScene_L: 
             create_scene(GardenScene_L); 
             break;
-        case 3: 
+        case SeaScene_L: 
             create_scene(SeaScene_L); 
             break;
         case -1:
             return false;
         default:
+            printf("[ERROR] unknown window=%d\n", window);    
             break;
         }
+        printf("[DEBUG] new scene created: scene=%p, Update=%p\n",
+               (void*)scene,
+               scene ? (void*)scene->Update : NULL);
     }
     return true;
 }

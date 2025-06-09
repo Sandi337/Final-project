@@ -8,17 +8,7 @@
 /*
    [game scene object]
 */
-/*typedef enum EleType
-{
-    Character_L,
-    Hud_L,
-    Mushroom_L,
-    Vine_L,
-    Tree_L,
-    Gardendoor_L,
-    Projectile_L,
-    Pause_button_L
-} EleType;*/
+
 typedef struct _GameScene
 {
     ALLEGRO_BITMAP *background;
@@ -30,8 +20,9 @@ typedef struct _GameScene
     int width, height;
     double start_time;          //倒計時器
     float energy_timer;         // 每 3 秒扣能量
-    bool garden_portal_spawned;
-    double garden_portal_timer;
+    //bool garden_portal_spawned; //入口是否生成過
+    //double garden_portal_timer;
+    
 
 } GameScene;
 Scene *New_GameScene(int label);

@@ -4,6 +4,7 @@
 #include "../shapes/Rectangle.h"
 #include "../global.h" 
 #include "../GameWindow.h" 
+#include "../element/element_label.h"
 /*
    [Legend function]
 */

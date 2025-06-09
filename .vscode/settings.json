@@ -34,6 +34,10 @@
 		"continue.h": "c",
 		"scene.h": "c",
 		"element_label.h": "c",
-		"allegro_color.h": "c"
+		"allegro_color.h": "c",
+		"game_assert.h": "c",
+		"global.h": "c",
+		"mushrooms_blue.h": "c",
+		"audio.h": "c"
 	}
 }

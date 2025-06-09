@@ -3,7 +3,9 @@
 #include <allegro5/allegro_acodec.h>
 #include <allegro5/allegro_font.h>
 #include <allegro5/allegro_ttf.h>
+#include "../scene/sceneManager.h"
 #include "menu.h"
+#include "../global.h"
 #include <stdbool.h>
 /*
    [Menu function]
@@ -38,10 +40,12 @@ Scene *New_Menu(int label)
 }
 void menu_update(Scene *self, float delta_time)
 {
+    (void)delta_time;
     if (key_state[ALLEGRO_KEY_ENTER])
     {
+        printf("[DEBUG] Enter pressed, menu_update set scene_end\n");
         self->scene_end = true;
-        window = 1;
+        window = GameScene_L;
     }
     return;
 }

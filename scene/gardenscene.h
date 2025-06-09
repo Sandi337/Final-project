@@ -6,26 +6,25 @@
 #include "../element/charater.h"
 #include "../element/element_label.h"
 
-/*Scene* New_GardenScene(int label);
+/*Scene* New_GardenScene(int label);*/
 
-typedef enum EleType_garden
-{
-    Character_L,
-    Pause_button_L,
+/*typedef enum GardenEleType {
+    Button_L, 
+    Mousesign_L,
     Mushrooms_red_L,
     Mushrooms_blue_L,
     Mushrooms_green_L,
     Mushrooms_purple_L,
-    Button_L,
-    Mousesign_L ,
     Continue_L,
     Legend_L
-} EleType_garden;*/
+} GardenEleType;*/
+
 typedef struct _GardenScene
 {
     ALLEGRO_BITMAP *background;
     ALLEGRO_SAMPLE *song;
     ALLEGRO_SAMPLE_INSTANCE *sample_instance;
+    int width, height;
 
 } GardenScene;
 Scene *New_GardenScene(int label);

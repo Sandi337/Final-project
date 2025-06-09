@@ -2,8 +2,8 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 #include "gardenscene.h"
-
-#include "../element/element.h"
+#include "../global.h"
+#include "../element/element_label.h"
 #include "../element/charater.h"
 #include "../garden_element/Mousesign.h"
 #include "../garden_element/Mushrooms_red.h"
@@ -14,6 +14,8 @@
 #include "../garden_element/Pause_button.h"
 #include "../garden_element/Continue.h"
 #include "../garden_element/Legend.h"
+
+extern int window;
 /*
    [GardenScene function]
 */
@@ -24,9 +26,13 @@ Scene* New_GardenScene(int label) {
     // setting derived object member
     pDerivedObj->song = al_load_sample("assets/sound/Garden_dance.mp3");
     pDerivedObj->background = al_load_bitmap("assets/image/MushroomForest2.jpg");
+    if (!pDerivedObj->background) {
+        fprintf(stderr, "Failed to load Garden background image!\n");
+        exit(1);
+    }
     al_reserve_samples(20);
     pDerivedObj->sample_instance = al_create_sample_instance(pDerivedObj->song);
-    pObj->pDerivedObj = pDerivedObj;
+
     // register element
     _Register_elements(pObj, New_Character(Character_L));
     _Register_elements(pObj, New_Mousesign(Mousesign_L));
@@ -44,6 +50,7 @@ Scene* New_GardenScene(int label) {
     al_attach_sample_instance_to_mixer(pDerivedObj->sample_instance, al_get_default_mixer());
     // set the volume of instance
     al_set_sample_instance_gain(pDerivedObj->sample_instance, 0.1);
+    al_play_sample_instance(pDerivedObj->sample_instance);
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Update = garden_scene_update;
@@ -87,7 +94,7 @@ void garden_scene_draw(Scene *self)
 {
     al_clear_to_color(al_map_rgb(0, 0, 0));
     GardenScene *gs = ((GardenScene *)(self->pDerivedObj));
-    al_draw_bitmap(gs->background, 0, 0, 0);
+    //al_draw_bitmap(gs->background, 0, 0, 0);
     ElementVec allEle = _Get_all_elements(self);
     if (gs->background) {
         al_draw_scaled_bitmap(gs->background, 
@@ -99,7 +106,7 @@ void garden_scene_draw(Scene *self)
         Elements *ele = allEle.arr[i];
         ele->Draw(ele);
     }
-    al_play_sample_instance(gs->sample_instance);
+    //al_play_sample_instance(gs->sample_instance);
 
 }
 void garden_scene_destroy(Scene *self)
