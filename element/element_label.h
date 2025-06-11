@@ -25,6 +25,10 @@ typedef enum EleType {
     Continue_L,
     Legend_L,
 
+    // 海洋場景專用
+    Character_Sea_L,
+    Spirit_L,
+
     MAX_LABEL  // 總數，用不上也可留作防越界
     
 } EleType;

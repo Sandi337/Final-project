@@ -16,3 +16,9 @@ Point mouse;
 bool debug_mode = true;
 bool is_paused = false;
 bool legend = false;
+
+//開發者模式
+bool dev_mode = true;  // demo 開啟，正式版改成 false
+
+bool is_invincible = false; //無敵
+bool is_speed_up = false; //加速

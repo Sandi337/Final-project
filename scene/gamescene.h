@@ -23,6 +23,7 @@ typedef struct _GameScene
     float energy_timer;         // 每 3 秒扣能量
     bool garden_portal_spawned; //入口是否生成過
     double garden_portal_timer;
+    bool has_switched_to_sea;   //是否切換到海洋
     
 
 } GameScene;

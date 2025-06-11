@@ -4,7 +4,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_font.h>
 #include "../scene/scene.h"
-#include "../element/charater.h"
+//#include "../element/charater.h"
 #include "../element/element_label.h"
 
 

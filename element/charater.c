@@ -44,9 +44,6 @@ Elements *New_Character(int label, CharacterStatus *status)
     pDerivedObj->state = STOP;
     pDerivedObj->new_proj = false;
     pDerivedObj->status = status;
-    pDerivedObj->health = status->HP;
-    pDerivedObj->energy = status->EN;
-    pDerivedObj->spirit = status->SP;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Draw = Character_draw;
@@ -150,7 +147,6 @@ void Character_update(Elements *self, float delta_time)
             chara->new_proj = false;
         }
     }
-    SyncCharacterToStatus(chara);
 }
 void Character_draw(Elements *self)
 {
@@ -198,9 +194,3 @@ void _Character_update_position(Elements *self, int dx, int dy)
 
 void Character_interact(Elements *self) {}
 
-void SyncCharacterToStatus(Character *chara) {
-    if (!chara || !chara->status) return;
-    chara->status->HP = chara->health;
-    chara->status->EN = chara->energy;
-    chara->status->SP = chara->spirit;
-}

@@ -61,10 +61,12 @@ Elements *New_Mushroom(int label)
 
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
     pDerivedObj->height = al_get_bitmap_height(pDerivedObj->img);
+    pDerivedObj->was_clicked = false;
     // 隨機位置（避免與地面重疊，假設地面在下半部）
     pDerivedObj->x = rand() % (WIDTH - pDerivedObj->width);
     int min_y = HEIGHT * MIN_Y_HEIGHT_RATIO;               // 新上界
     int max_y = HEIGHT - pDerivedObj->height;              // 下界
+    
     pDerivedObj->y = (rand() % (max_y - min_y + 1)) + min_y;
     pDerivedObj->active = true;
     pDerivedObj->hitbox = New_Circle(pDerivedObj->x + pDerivedObj->width / 2,
@@ -92,6 +94,7 @@ void Mushroom_update(Elements *self, float delta_time)
 
     if (m->x + m->width <= 1) {
         printf("Mushroom auto delete at x = %d\n", m->x);
+        m->active = false;
         self->dele = true;
     }
     
@@ -99,7 +102,7 @@ void Mushroom_update(Elements *self, float delta_time)
 
 void Mushroom_interact(Elements *self)
 {
-    //if (self->dele) return;
+    if (self->dele) return;
 
     for (int j = 0; j < self->inter_len; j++)
     {
@@ -155,30 +158,32 @@ void Mushroom_destroy(Elements *self)
     Mushroom *mush = (Mushroom *)(self->pDerivedObj);
 
     // 找角色
-    Elements *character_ele = Get_Character_Element();
-    if (character_ele && mush->was_clicked) {
-        Character *chara = (Character *)character_ele->pDerivedObj;
-        printf("[DESTROY] The mushroom has been eaten. Updating the character's stats...\n");
+     if (mush->was_clicked) {  // 只有真的點擊才吃
+        Elements *character_ele = Get_Character_Element();
+        if (character_ele) {
+            Character *chara = (Character *)character_ele->pDerivedObj;
+            printf("[DESTROY] The mushroom has been eaten. Updating the character's stats...\n");
 
-        switch (mush->type) {
-            case 0: chara->energy += 10; break; // 綠色：補能量
-            case 1: chara->health -= 10; break;// 紅色：扣血
-            case 2: chara->spirit -= 10; break;// 藍色：扣精神
-            case 3:// 彩虹：全扣
-                chara->health -= 20;
-                //chara->energy -= 20;
-                chara->spirit -= 20;
-                break;
+            switch (mush->type) {
+                case 0: chara->status->EN += 10; break; // 綠色：補能量
+                case 1: chara->status->HP -= 10; break;// 紅色：扣血
+                case 2: chara->status->SP -= 10; break;// 藍色：扣精神
+                case 3:// 彩虹：全扣
+                    chara->status->HP -= 20;
+                    //chara->energy -= 20;
+                    chara->status->SP -= 20;
+                    break;
+            }
+
+            // 限制 0~100
+            chara->status->HP = clamp(chara->status->HP, 0, MAX_HEALTH);
+            chara->status->EN = clamp(chara->status->EN, 0, MAX_ENERGY);
+            chara->status->SP = clamp(chara->status->SP, 0, MAX_SPIRIT);
+
+            printf("[STATUS] HP=%d EN=%d SP=%d\n", chara->status->HP, chara->status->EN, chara->status->SP);
+            //SyncCharacterToStatus(chara);
         }
-
-        // 限制 0~100
-        chara->health = clamp(chara->health, 0, MAX_HEALTH);
-        chara->energy = clamp(chara->energy, 0, MAX_ENERGY);
-        chara->spirit = clamp(chara->spirit, 0, MAX_SPIRIT);
-
-        printf("[STATUS] HP=%d EN=%d SP=%d\n", chara->health, chara->energy, chara->spirit);
-    }
-
+     }
     al_destroy_bitmap(mush->img);
     free(mush->hitbox);
     free(mush);

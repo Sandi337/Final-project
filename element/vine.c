@@ -25,7 +25,7 @@ Elements *New_Vine(int label)
     pDerivedObj->img = al_load_bitmap("assets/image/vine1.png");
     pDerivedObj->width = al_get_bitmap_width(pDerivedObj->img);
     pDerivedObj->height = al_get_bitmap_height(pDerivedObj->img);
-    pDerivedObj->x = -30;
+    pDerivedObj->x = WIDTH + 100;
     pDerivedObj->y = HEIGHT - pDerivedObj->height+30;
     pDerivedObj->hitbox = New_Rectangle(pDerivedObj->x + pDerivedObj->width / 3,
                                         pDerivedObj->y ,
@@ -59,6 +59,9 @@ void Vine_update(Elements *self, float delta_time) {
         //printf("[DEBUG] Vine is visible at x=%d\n", v->x);
         if (now - v->visible_since >= SHOW_DURATION) {
             v->visible = false;                       // 消失
+            // 將 hitbox 移出畫面（不會被判定）
+            Rectangle *rect = (Rectangle *)(v->hitbox->pDerivedObj);
+            rect->x1 = rect->y1 = rect->x2 = rect->y2 = -999;
             /* 安排下一次出現時間 */
             double gap = MIN_GAP + (rand() / (double)RAND_MAX) * (MAX_GAP - MIN_GAP);
             v->next_appear_ts = now + gap;
@@ -81,9 +84,9 @@ void Vine_interact(Elements *self) {
     for (int i = 0; i < chars.len; i++) {
         Character *chara = (Character *)(chars.arr[i]->pDerivedObj);
         if (vine->hitbox->overlap(vine->hitbox, chara->hitbox)) {
-            chara->health -= 15;
-            if (chara->health < 0) chara->health = 0;
-            printf("[VINE HIT] HP reduced to %d\n", chara->health);
+            chara->status->HP -= 15;
+            if (chara->status->HP < 0) chara->status->HP = 0;
+            printf("[VINE HIT] HP reduced to %d\n", chara->status->HP);
             play_hurt_sound();
             vine->visible = false;
             vine->next_appear_ts = al_get_time() + 3.0;

@@ -6,6 +6,7 @@ void AudioManager_Destroy();
 
 void play_bgm();
 void play_garden_bgm();
+void play_SEA_bgm();
 void stop_bgm();
 void play_dig_sound();
 void play_eat_sound();

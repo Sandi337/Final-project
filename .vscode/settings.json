@@ -43,6 +43,11 @@
 		"garden_character.h": "c",
 		"algif.h": "c",
 		"gameoverscene.h": "c",
-		"character_status.h": "c"
+		"character_status.h": "c",
+		"charater_sea.h": "c",
+		"spirit.h": "c",
+		"sea_element.h": "c",
+		"stdio.h": "c",
+		"seascene.h": "c"
 	}
 }

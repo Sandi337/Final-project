@@ -175,11 +175,17 @@ bool game_update(Game *self, float delta_time)
         case GardenScene_L: 
             create_scene(GardenScene_L); 
             break;
-        /*case SeaScene_L: 
+        case SeaScene_L: 
             create_scene(SeaScene_L); 
-            break;*/
+            break;
         case GameOverScene_L:
             create_scene(GameOverScene_L);
+            if (!scene) {
+                printf("scene is NULL after switching!\n");
+            }
+            break;
+        case GameclearScene_L:
+            create_scene(GameclearScene_L);
             if (!scene) {
                 printf("scene is NULL after switching!\n");
             }

@@ -13,8 +13,7 @@
 #include "../element/tree.h"
 #include "../element/projectile.h"
 #include "../element/gardendoor.h"
-/*#include "../element/Continue.h"
-#include "../element/Legend.h"*/
+
 
 #define FPS 60
 #define MIN_MUSHROOM_DISTANCE 200  // 蘑菇之間最小距離（像素）
@@ -97,6 +96,7 @@ Scene *New_GameScene(int label, CharacterStatus *status)
     pDerivedObj->energy_timer = 0.0;
     pDerivedObj->garden_portal_spawned = false;
     pDerivedObj->garden_portal_timer = 0.0;
+    pDerivedObj->has_switched_to_sea = false;
     pObj->pDerivedObj = pDerivedObj;
     // setting derived object function
     pObj->Update = game_scene_update;
@@ -113,7 +113,7 @@ void game_scene_update(Scene *self, float delta_time)
     ElementVec allEle = _Get_all_elements(self);
     GameScene *gs = ((GameScene *)(self->pDerivedObj));
     Character *chara = NULL;
-
+    
     // Find the character
     for (int i = 0; i < allEle.len; i++) {
         if (allEle.arr[i]->label == Character_L) {
@@ -126,19 +126,20 @@ void game_scene_update(Scene *self, float delta_time)
         printf("[ERROR] Character not found in allEle!\n");
         return; // 若未找到，退出更新
     }
-    if (chara->health <= 0) {
+    if (chara->status->HP <= 0) {
         window = GameOverScene_L;
         self->scene_end = true;
     }
+    
     // 能量每 5 秒扣 5 點
     //delta_time =  1.0 / 60 ;//每秒更新 60 次
     gs->energy_timer += delta_time;
     if (gs->energy_timer >= 5.0f && chara) {
-        chara->energy -= 5;
-        if (chara->energy < 0) chara->energy = 0;
+        chara->status->EN -= 5;
+        if (chara->status->EN < 0) chara->status->EN = 0;
         gs->energy_timer = 0.0f;
 
-        printf("[TIMER]Auto deduct energy every 5 seconds, remaining Energy = %d\n", chara->energy);
+        printf("[TIMER]Auto deduct energy every 5 seconds, remaining Energy = %d\n", chara->status->EN);
     }
     // === 1. 背景與元素滾動邏輯 ===
     bool should_scroll = (chara && chara->state == MOVE && chara->dir && chara->x > WIDTH / 3.0);
@@ -240,8 +241,8 @@ void game_scene_update(Scene *self, float delta_time)
         }
         
     }
-    // 每 5 秒檢查一次精神值是否 < 75，如果是，生成花園入口
-    if (chara && chara->spirit < 75) {
+    // 2. 花園 每 5 秒檢查一次精神值是否 < 75，如果是，生成花園入口
+    if (chara && chara->status->SP < 75) {
         gs->garden_portal_timer += delta_time;
         if (!gs->garden_portal_spawned && gs->garden_portal_timer >= 5.0f) {
             printf("[GARDEN] Spirit < 75 -> Randomly spawning garden portal...\n");
@@ -254,9 +255,23 @@ void game_scene_update(Scene *self, float delta_time)
 
             gs->garden_portal_spawned = true;
         }
-    } else if (chara && chara->spirit >= 75) {
+    } else if (chara && chara->status->SP >= 75) {
         gs->garden_portal_timer = 0.0;
     }
+    
+    // 血量< 35 或剩下一分鐘自動切換到海洋場景
+    double elapsed = al_get_time() - gs->start_time;
+    int remaining = 180 - (int)elapsed;
+
+    if (!gs->has_switched_to_sea && (chara->status->HP < 35 || remaining <= 60) && window != SeaScene_L) {
+        gs->has_switched_to_sea = true;
+        printf("[Trigger] HP = %d, Remaining Time = %d sec -> Switching to SEA Scene\n", chara->status->HP, remaining);
+        stop_bgm();
+        window = SeaScene_L;
+        self->scene_end = true;
+        return;
+    }
+
     
     // 更新所有元素
     for (int i = 0; i < allEle.len; i++) {
