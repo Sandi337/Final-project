@@ -7,6 +7,7 @@ SOURCE := $(wildcard *.c */*.c)
 OBJ := $(patsubst %.c, %.o, $(notdir $(SOURCE)))
 RM_OBJ := 
 RM_OUT := 
+OBJ += resource.o
 
 ifeq ($(OS), Windows_NT) # Windows OS
 	ALLEGRO_PATH := ../allegro
