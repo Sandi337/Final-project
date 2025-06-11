@@ -1,6 +1,8 @@
 # Ichigo_Final_project
 *這是個期末專案，不免有些簡陋，請玩家海涵
 ![image](https://github.com/user-attachments/assets/014bbb3a-3b54-44f0-a917-f32f07928459)
+
+
 🌊 Ichigo：潛意識森林
 Ichigo 是一款結合探索與節奏操作的情感體驗遊戲。
  你將扮演一位小孩，誤入象徵潛意識的地底世界，在混亂、恐懼與迷失之中，一步步尋找回歸自我的道路。
